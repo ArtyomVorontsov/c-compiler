@@ -23,13 +23,15 @@ int INT_FA_LENGTH = 3;
 char * machine_INT_FA(char *p);
 int getval(struct INT_FA *ep, int n);
 int get_val_by_key_INT_FA(char c);
-int get_val_by_position_INT_FA(int n);
 int lex(char *inp);
 
 int main(){
 	char inp[1000] = { '\0' };
 
 	printf("Type your program\n");
+
+	fgets(inp, 1000, stdin);	
+
 	scanf("%s", inp);
 	printf("done\n");
 	int out = lex(inp);
@@ -52,9 +54,6 @@ int lex(char *inp){
 		token_start = tmp;
 
 		
-		printf("token_end: %d\n", token_end);
-		printf("token_start: %d\n", token_start);
-
 		if(token_end != -1) { 
 			tokens[i].type = "INT";
 			i++;
@@ -77,25 +76,9 @@ char * machine_INT_FA(char *p){
 	int i = 0;
 	while(1){
 		c = get_val_by_key_INT_FA(*(p + i));
-		printf("c: %d | d: %d\n", c, *(p + i));
 		if(c == -1) return -1;
 		if(c == '\0') return p + i + 1;
 		i++;
-	}
-}
-
-int get_val_by_position_INT_FA(int n) {
-	switch(n) {
-		case 0: 
-			return INT_FA_IMP.i;
-		case 1: 
-			return INT_FA_IMP.n;
-		case 2:
-			return INT_FA_IMP.t;
-		case 3:
-			return INT_FA_IMP.space;
-		default:
-			return -1;
 	}
 }
 
