@@ -12,10 +12,10 @@ struct Token {
 	union Value value;
 };
 
-char * machine_INT_FA(char *p);
-char * machine_step2_INT_FA(char *p);
-char * machine_step3_INT_FA(char *p);
-char * machine_step4_INT_FA(char *p);
+char * machine_INT_KEYWORD_FA(char *p);
+char * machine_step2_INT_KEYWORD_FA(char *p);
+char * machine_step3_INT_KEYWORD_FA(char *p);
+char * machine_step4_INT_KEYWORD_FA(char *p);
 
 char * machine_RETURN_KEYWORD_FA(char *p);
 char * machine_step2_RETURN_KEYWORD_FA(char *p);
@@ -27,6 +27,9 @@ char * machine_step7_RETURN_KEYWORD_FA(char *p);
 
 char * machine_IDENTIFIER_FA(char *p);
 char * machine_step2_IDENTIFIER_FA(char *p);
+
+char * machine_INT_FA(char *p);
+char * machine_step2_INT_FA(char *p);
 
 char * machine_WHITESPACE_FA(char *p);
 
@@ -67,20 +70,6 @@ int lex(char *inp){
 	
 
 	while(*p != '\0'){
-		/* INT */
-		tmp = token_end;
-		token_start = token_end;
-		token_end = machine_INT_FA(token_start);
-
-		if(token_end != -1) { 
-			tokens[i].type = "INT";
-			cpy_str(token_start, token_end, tokens[i].value.string, 100);
-			i++;
-			token_end++;
-			continue;
-		} else {
-			token_end = tmp;
-		}
 
 		/* OPEN_BRACE */
 		tmp = token_end;
@@ -144,6 +133,35 @@ int lex(char *inp){
 		token_end = machine_SEMICOLON_FA(token_start);
 		if(token_end != -1) { 
 			tokens[i].type = "SEMICOLON";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* INT */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_INT_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "INT";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* INT_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_INT_KEYWORD_FA(token_start);
+
+		if(token_end != -1) { 
+			tokens[i].type = "INT_KEYWORD";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
 			token_end++;
@@ -282,11 +300,58 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 	}
 }
 
+/* INT KEYWORD FA */
+
+char * machine_INT_KEYWORD_FA(char *p){
+	switch (*p){
+		case 'i': 
+			return machine_step2_INT_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step2_INT_KEYWORD_FA(char *p){
+	switch (*p){
+		case 'n': 
+			return machine_step3_INT_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step3_INT_KEYWORD_FA(char *p){
+	switch (*p){
+		case 't': 
+			return machine_step4_INT_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step4_INT_KEYWORD_FA(char *p){
+	switch (*p){
+		case ' ': 
+			return p - 1;
+		default:
+			return -1;
+	}	
+}
+
 /* INT FA */
 
 char * machine_INT_FA(char *p){
-	switch (*p){
-		case 'i': 
+	switch(*p){
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
 			return machine_step2_INT_FA(p + 1);
 		default:
 			return -1;
@@ -294,26 +359,20 @@ char * machine_INT_FA(char *p){
 }
 
 char * machine_step2_INT_FA(char *p){
-	switch (*p){
-		case 'n': 
-			return machine_step3_INT_FA(p + 1);
-		default:
-			return -1;
-	}	
-}
-
-char * machine_step3_INT_FA(char *p){
-	switch (*p){
-		case 't': 
-			return machine_step4_INT_FA(p + 1);
-		default:
-			return -1;
-	}	
-}
-
-char * machine_step4_INT_FA(char *p){
-	switch (*p){
-		case ' ': 
+	switch(*p){
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			return machine_step2_INT_FA(p + 1);
+		case ' ':
+		case ';':
 			return p - 1;
 		default:
 			return -1;
