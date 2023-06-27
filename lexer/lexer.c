@@ -12,23 +12,15 @@ struct Token {
 	union Value value;
 };
 
-struct INT_FA {
-	char i, n, t, space;
-};
-
-struct INT_FA INT_FA_IMP = {
-	.i = 'n',
-	.n = 't',
-	.t = ' ',
-	.space = '\0'
-};
-
 char * machine_INT_FA(char *p);
+char * machine_step2_INT_FA(char *p);
+char * machine_step3_INT_FA(char *p);
+char * machine_step4_INT_FA(char *p);
 char * machine_IDENTIFIER_FA(char *p);
 char * machine_step2_IDENTIFIER_FA(char *p);
 char * machine_WHITESPACE_FA(char *p);
-int get_val_by_key_INT_FA(char c);
 int lex(char *inp);
+
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 
@@ -56,21 +48,20 @@ int lex(char *inp){
 	
 
 	while(*p != '\0'){
-		//printf("i: %d\n", i);
-		//printf("c: %c\n", *token_end);
-		printf("start: %d\n", token_start);
-		printf("end: %d\n", token_end);
-		printf("\n");
-
 		/* INT */
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_INT_FA(token_start);
+		printf("INT\n");
+		printf("start: %d\n", token_start);
+		printf("end: %d\n", token_end);
+		printf("\n");
 
 		if(token_end != -1) { 
 			tokens[i].type = "INT";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
+			token_end++;
 			continue;
 		} else {
 			token_end = tmp;
@@ -79,7 +70,8 @@ int lex(char *inp){
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
-		token_end = machine_IDENTIFIER_FA(token_start, 0);
+		token_end = machine_IDENTIFIER_FA(token_start);
+		printf("IDENTIFIER\n");
 		printf("start: %d\n", token_start);
 		printf("end: %d\n", token_end);
 		printf("\n");
@@ -88,19 +80,21 @@ int lex(char *inp){
 			tokens[i].type = "IDENTIFIER";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
+			token_end++;
 			continue;
 		} else {
 			token_end = tmp;
 		}
-		printf("start: %d\n", token_start);
-		printf("end: %d\n", token_end);
-		printf("\n");
-
+		
 		/* SKIP WHITESPACE */
 		/* TODO FIX WHITESPACE HANDLER */
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_WHITESPACE_FA(token_start);
+		printf("WHITESPACE\n");
+		printf("start: %d\n", token_start);
+		printf("end: %d\n", token_end);
+		printf("\n");
 		if(token_end == -1) token_end = tmp;
 		if(token_end != token_start) continue;
 		
@@ -156,7 +150,6 @@ char * machine_IDENTIFIER_FA(char *p) {
 		case '_':
 			return machine_step2_IDENTIFIER_FA(p + 1);
 		default:
-			printf("I AM HERE IDENTIFIER 1!\n");
 			return -1;
 	}
 }
@@ -194,39 +187,46 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 		case ' ':
 			return p;
 		default:
-			printf("I AM HERE IDENTIFIER 2!\n");
 			return -1;
 	}
 }
 
 /* INT FA */
-char * machine_INT_FA(char *p){
-	char c;
-	int i = 0;
-	while(1){
-		c = get_val_by_key_INT_FA(*(p + i));
-		if(c == -1) {
-			printf("I AM HERE INT!\n");
-			return -1;
-		}
-		if(c == '\0' && i >= 3) return p + i - 1;
-		i++;
-	}
-}
 
-int get_val_by_key_INT_FA(char c) {
-	switch(c){
-		case 'i':
-			return INT_FA_IMP.i;
-		case 'n':
-			return INT_FA_IMP.n;
-		case 't':
-			return INT_FA_IMP.t;
-		case ' ':
-			return INT_FA_IMP.space;
+char * machine_INT_FA(char *p){
+	switch (*p){
+		case 'i': 
+			return machine_step2_INT_FA(p + 1);
 		default:
 			return -1;
-	}
+	}	
+}
+
+char * machine_step2_INT_FA(char *p){
+	switch (*p){
+		case 'n': 
+			return machine_step3_INT_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step3_INT_FA(char *p){
+	switch (*p){
+		case 't': 
+			return machine_step4_INT_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step4_INT_FA(char *p){
+	switch (*p){
+		case ' ': 
+			return p - 1;
+		default:
+			return -1;
+	}	
 }
 
 /* UTILS */
