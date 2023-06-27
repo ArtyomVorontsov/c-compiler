@@ -16,9 +16,28 @@ char * machine_INT_FA(char *p);
 char * machine_step2_INT_FA(char *p);
 char * machine_step3_INT_FA(char *p);
 char * machine_step4_INT_FA(char *p);
+
+char * machine_RETURN_KEYWORD_FA(char *p);
+char * machine_step2_RETURN_KEYWORD_FA(char *p);
+char * machine_step3_RETURN_KEYWORD_FA(char *p);
+char * machine_step4_RETURN_KEYWORD_FA(char *p);
+char * machine_step5_RETURN_KEYWORD_FA(char *p);
+char * machine_step6_RETURN_KEYWORD_FA(char *p);
+char * machine_step7_RETURN_KEYWORD_FA(char *p);
+
 char * machine_IDENTIFIER_FA(char *p);
 char * machine_step2_IDENTIFIER_FA(char *p);
+
 char * machine_WHITESPACE_FA(char *p);
+
+char * machine_OPEN_BRACE_FA(char *p);
+char * machine_CLOSE_BRACE_FA(char *p);
+
+char * machine_OPEN_PARENTHESIS_FA(char *p);
+char * machine_CLOSE_PARENTHESIS_FA(char *p);
+
+char * machine_SEMICOLON_FA(char *p);
+
 int lex(char *inp);
 
 /* UTILS */
@@ -52,10 +71,6 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_INT_FA(token_start);
-		printf("INT\n");
-		printf("start: %d\n", token_start);
-		printf("end: %d\n", token_end);
-		printf("\n");
 
 		if(token_end != -1) { 
 			tokens[i].type = "INT";
@@ -66,15 +81,95 @@ int lex(char *inp){
 		} else {
 			token_end = tmp;
 		}
+
+		/* OPEN_BRACE */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_OPEN_BRACE_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "OPEN_BRACE";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
 		
+		/* CLOSE_BRACE */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_CLOSE_BRACE_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "CLOSE_BRACE";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* OPEN_PARENTHESIS */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_OPEN_PARENTHESIS_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "OPEN_PARENTHESIS";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* CLOSE_PARENTHESIS */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_CLOSE_PARENTHESIS_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "CLOSE_PARENTHESIS";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* SEMICOLON */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_SEMICOLON_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "SEMICOLON";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* RETURN_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_RETURN_KEYWORD_FA(token_start);
+		if(token_end != -1) { 
+			tokens[i].type = "RETURN_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_IDENTIFIER_FA(token_start);
-		printf("IDENTIFIER\n");
-		printf("start: %d\n", token_start);
-		printf("end: %d\n", token_end);
-		printf("\n");
 
 		if(token_end != -1) { 
 			tokens[i].type = "IDENTIFIER";
@@ -91,10 +186,6 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_WHITESPACE_FA(token_start);
-		printf("WHITESPACE\n");
-		printf("start: %d\n", token_start);
-		printf("end: %d\n", token_end);
-		printf("\n");
 		if(token_end == -1) token_end = tmp;
 		if(token_end != token_start) continue;
 		
@@ -223,6 +314,129 @@ char * machine_step3_INT_FA(char *p){
 char * machine_step4_INT_FA(char *p){
 	switch (*p){
 		case ' ': 
+			return p - 1;
+		default:
+			return -1;
+	}	
+}
+
+/* OPEN_BRACE FA */
+
+char * machine_OPEN_BRACE_FA(char *p){
+	switch (*p){
+		case '{': 
+			return p;
+		default:
+			return -1;
+	}	
+}
+
+/* CLOSE_BRACE FA */
+
+char * machine_CLOSE_BRACE_FA(char *p){
+	switch (*p){
+		case '}': 
+			return p;
+		default:
+			return -1;
+	}	
+}
+
+/* OPEN_PARENTHESIS FA */
+
+char * machine_OPEN_PARENTHESIS_FA(char *p){
+	switch (*p){
+		case '(': 
+			return p;
+		default:
+			return -1;
+	}	
+}
+
+/* CLOSE_PARENTHESIS FA */
+
+char * machine_CLOSE_PARENTHESIS_FA(char *p){
+	switch (*p){
+		case ')': 
+			return p;
+		default:
+			return -1;
+	}	
+}
+
+
+/* SEMICOLON FA */
+
+char * machine_SEMICOLON_FA(char *p){
+	switch (*p){
+		case ';': 
+			return p;
+		default:
+			return -1;
+	}	
+}
+
+/* RETURN FA */
+
+char * machine_RETURN_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'r': 
+			return machine_step2_RETURN_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step2_RETURN_KEYWORD_FA(char *p){
+	switch (*p){
+		case 'e': 
+			return machine_step3_RETURN_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step3_RETURN_KEYWORD_FA(char *p){
+	switch (*p){
+		case 't': 
+			return machine_step4_RETURN_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step4_RETURN_KEYWORD_FA(char *p){
+	switch (*p){
+		case 'u': 
+			return machine_step5_RETURN_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step5_RETURN_KEYWORD_FA(char *p){
+	switch (*p){
+		case 'r': 
+			return machine_step6_RETURN_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step6_RETURN_KEYWORD_FA(char *p){
+	switch (*p){
+		case 'n': 
+			return machine_step7_RETURN_KEYWORD_FA(p + 1);
+		default:
+			return -1;
+	}	
+}
+
+char * machine_step7_RETURN_KEYWORD_FA(char *p){
+	switch (*p){
+		case ' ': 
+			return p - 1;
+		case ';': 
 			return p - 1;
 		default:
 			return -1;
