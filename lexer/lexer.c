@@ -1,73 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-
-union Value {
-	int number;
-	char string[100];
-};
-
-struct Token {
-	char *type;
-	union Value value;
-};
-
-char * machine_INT_KEYWORD_FA(char *p);
-char * machine_step2_INT_KEYWORD_FA(char *p);
-char * machine_step3_INT_KEYWORD_FA(char *p);
-char * machine_step4_INT_KEYWORD_FA(char *p);
-
-char * machine_RETURN_KEYWORD_FA(char *p);
-char * machine_step2_RETURN_KEYWORD_FA(char *p);
-char * machine_step3_RETURN_KEYWORD_FA(char *p);
-char * machine_step4_RETURN_KEYWORD_FA(char *p);
-char * machine_step5_RETURN_KEYWORD_FA(char *p);
-char * machine_step6_RETURN_KEYWORD_FA(char *p);
-char * machine_step7_RETURN_KEYWORD_FA(char *p);
-
-char * machine_IDENTIFIER_FA(char *p);
-char * machine_step2_IDENTIFIER_FA(char *p);
-
-char * machine_INT_FA(char *p);
-char * machine_step2_INT_FA(char *p);
-
-char * machine_WHITESPACE_FA(char *p);
-
-char * machine_OPEN_BRACE_FA(char *p);
-char * machine_CLOSE_BRACE_FA(char *p);
-
-char * machine_OPEN_PARENTHESIS_FA(char *p);
-char * machine_CLOSE_PARENTHESIS_FA(char *p);
-
-char * machine_SEMICOLON_FA(char *p);
-
-struct Token * lex(char *inp);
-
-/* UTILS */
-void cpy_str(char *from, char *to, char *buff, int buff_size);
-
-int FA_FAILED = -2;
-struct Token tokens[100];
-
-int main(int argc, char **argv){
-	char inp[1000] = { '\0' };
-	char *p = inp;
-
-	FILE *ptr;
-	char ch;
-
-	ptr = fopen(argv[1], "r");
-	if(NULL == ptr) printf("File can't be opened\n");
-
-	do {
-		ch = fgetc(ptr);
-		*p++ = ch;
-	} while (ch != EOF);
-
-	lex(inp);
-
-	return 0;
-}
+#include "./lexer.h"
 
 struct Token * lex(char *inp){
 	char *p = inp, 
@@ -523,5 +454,4 @@ void cpy_str(char *from, char *to, char *buff, int buff_size){
 		i++;
 	}
 }
-
 
