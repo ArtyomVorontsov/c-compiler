@@ -41,12 +41,13 @@ char * machine_CLOSE_PARENTHESIS_FA(char *p);
 
 char * machine_SEMICOLON_FA(char *p);
 
-int lex(char *inp);
+struct Token * lex(char *inp);
 
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 
 int FA_FAILED = -2;
+struct Token tokens[100];
 
 int main(int argc, char **argv){
 	char inp[1000] = { '\0' };
@@ -63,17 +64,16 @@ int main(int argc, char **argv){
 		*p++ = ch;
 	} while (ch != EOF);
 
-	int out = lex(inp);
+	lex(inp);
 
-	return out;
+	return 0;
 }
 
-int lex(char *inp){
+struct Token * lex(char *inp){
 	char *p = inp, 
 	*token_start = inp,
 	*token_end = inp,
 	*tmp;
-	struct Token tokens[100];
 	int i = 0;
 
 	while(*p != '\0'){
@@ -221,6 +221,8 @@ int lex(char *inp){
 	printf("%d Results:\n", i);
 	while(i--)
 		printf("Type: %s | Value: %s\n", tokens[i].type, tokens[i].value.string);
+
+	return tokens;
 }
 /* WHITESPACE FA */
 
