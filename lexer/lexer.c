@@ -46,15 +46,23 @@ int lex(char *inp);
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 
-int main(){
+int FA_FAILED = -2;
+
+int main(int argc, char **argv){
 	char inp[1000] = { '\0' };
+	char *p = inp;
 
-	printf("Type your program\n");
+	FILE *ptr;
+	char ch;
 
-	fgets(inp, 1000, stdin);	
+	ptr = fopen(argv[1], "r");
+	if(NULL == ptr) printf("File can't be opened\n");
 
-	scanf("%s", inp);
-	printf("done\n");
+	do {
+		ch = fgetc(ptr);
+		*p++ = ch;
+	} while (ch != EOF);
+
 	int out = lex(inp);
 
 	return out;
@@ -67,7 +75,6 @@ int lex(char *inp){
 	*tmp;
 	struct Token tokens[100];
 	int i = 0;
-	
 
 	while(*p != '\0'){
 
@@ -75,7 +82,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_OPEN_BRACE_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "OPEN_BRACE";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -89,7 +96,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_CLOSE_BRACE_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "CLOSE_BRACE";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -103,7 +110,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_OPEN_PARENTHESIS_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "OPEN_PARENTHESIS";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -117,7 +124,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_CLOSE_PARENTHESIS_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "CLOSE_PARENTHESIS";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -131,7 +138,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_SEMICOLON_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "SEMICOLON";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -145,7 +152,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_INT_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "INT";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -160,7 +167,7 @@ int lex(char *inp){
 		token_start = token_end;
 		token_end = machine_INT_KEYWORD_FA(token_start);
 
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "INT_KEYWORD";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -174,7 +181,7 @@ int lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_RETURN_KEYWORD_FA(token_start);
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "RETURN_KEYWORD";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -189,7 +196,7 @@ int lex(char *inp){
 		token_start = token_end;
 		token_end = machine_IDENTIFIER_FA(token_start);
 
-		if(token_end != -1) { 
+		if(token_end != FA_FAILED) { 
 			tokens[i].type = "IDENTIFIER";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			i++;
@@ -199,16 +206,15 @@ int lex(char *inp){
 			token_end = tmp;
 		}
 		
-		/* SKIP WHITESPACE */
-		/* TODO FIX WHITESPACE HANDLER */
+		/* WHITESPACE */
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_WHITESPACE_FA(token_start);
-		if(token_end == -1) token_end = tmp;
+		if(token_end == FA_FAILED) token_end = tmp;
 		if(token_end != token_start) continue;
 		
 
-		printf("No lex handler\n");
+		printf("No lex handler c: %c d: %d\n", *token_end, *token_end);
 		break;	
 	}
 
@@ -219,13 +225,9 @@ int lex(char *inp){
 /* WHITESPACE FA */
 
 char * machine_WHITESPACE_FA(char *p){
-	if(*p == ' ') {
-		while(*(p++) == ' ');
-		return p - 1;
-	}
-
+	while((*p == ' ') || (*p == '\t') || (*p == '\n')) p++;
 	return p;
-}
+} 
 
 /* IDENTIFIER FA */
 char * machine_IDENTIFIER_FA(char *p) {
@@ -259,7 +261,7 @@ char * machine_IDENTIFIER_FA(char *p) {
 		case '_':
 			return machine_step2_IDENTIFIER_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}
 }
 
@@ -294,9 +296,12 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 		case '_':
 			return machine_step2_IDENTIFIER_FA(p + 1);
 		case ' ':
-			return p;
+		case '(':
+		case '\n':
+		case '\t':
+			return p - 1;
 		default:
-			return -1;
+			return FA_FAILED;
 	}
 }
 
@@ -307,7 +312,7 @@ char * machine_INT_KEYWORD_FA(char *p){
 		case 'i': 
 			return machine_step2_INT_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -316,7 +321,7 @@ char * machine_step2_INT_KEYWORD_FA(char *p){
 		case 'n': 
 			return machine_step3_INT_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -325,7 +330,7 @@ char * machine_step3_INT_KEYWORD_FA(char *p){
 		case 't': 
 			return machine_step4_INT_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -334,7 +339,7 @@ char * machine_step4_INT_KEYWORD_FA(char *p){
 		case ' ': 
 			return p - 1;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -354,7 +359,7 @@ char * machine_INT_FA(char *p){
 		case '9':
 			return machine_step2_INT_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -373,9 +378,11 @@ char * machine_step2_INT_FA(char *p){
 			return machine_step2_INT_FA(p + 1);
 		case ' ':
 		case ';':
+		case '\n':
+		case '\t':
 			return p - 1;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -386,7 +393,7 @@ char * machine_OPEN_BRACE_FA(char *p){
 		case '{': 
 			return p;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -397,7 +404,7 @@ char * machine_CLOSE_BRACE_FA(char *p){
 		case '}': 
 			return p;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -408,7 +415,7 @@ char * machine_OPEN_PARENTHESIS_FA(char *p){
 		case '(': 
 			return p;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -419,7 +426,7 @@ char * machine_CLOSE_PARENTHESIS_FA(char *p){
 		case ')': 
 			return p;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -431,7 +438,7 @@ char * machine_SEMICOLON_FA(char *p){
 		case ';': 
 			return p;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -442,7 +449,7 @@ char * machine_RETURN_KEYWORD_FA(char *p) {
 		case 'r': 
 			return machine_step2_RETURN_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -451,7 +458,7 @@ char * machine_step2_RETURN_KEYWORD_FA(char *p){
 		case 'e': 
 			return machine_step3_RETURN_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -460,7 +467,7 @@ char * machine_step3_RETURN_KEYWORD_FA(char *p){
 		case 't': 
 			return machine_step4_RETURN_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -469,7 +476,7 @@ char * machine_step4_RETURN_KEYWORD_FA(char *p){
 		case 'u': 
 			return machine_step5_RETURN_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -478,7 +485,7 @@ char * machine_step5_RETURN_KEYWORD_FA(char *p){
 		case 'r': 
 			return machine_step6_RETURN_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
@@ -487,18 +494,19 @@ char * machine_step6_RETURN_KEYWORD_FA(char *p){
 		case 'n': 
 			return machine_step7_RETURN_KEYWORD_FA(p + 1);
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
 char * machine_step7_RETURN_KEYWORD_FA(char *p){
 	switch (*p){
 		case ' ': 
-			return p - 1;
 		case ';': 
+		case '\n':
+		case '\t':
 			return p - 1;
 		default:
-			return -1;
+			return FA_FAILED;
 	}	
 }
 
