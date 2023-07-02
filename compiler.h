@@ -15,3 +15,13 @@ struct Token {
 
 struct Token * lex(char *inp);
 
+/* PARSER */
+int parse();
+
+/* UTILS */
+char * read_file(char * file_name, char * buff);
+
+/* CONSTANTS */
+extern int FA_FAILED;
+extern struct Token tokens[100];
+

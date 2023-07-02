@@ -33,6 +33,3 @@ char * machine_SEMICOLON_FA(char *p);
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 
-/* CONSTANTS */
-int FA_FAILED = -2;
-struct Token tokens[100];
