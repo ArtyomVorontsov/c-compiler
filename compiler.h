@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 /* LEXER */
 union Value {
@@ -22,6 +23,6 @@ int parse();
 char * read_file(char * file_name, char * buff);
 
 /* CONSTANTS */
-extern int FA_FAILED;
+extern long FA_FAILED;
 extern struct Token tokens[100];
 
