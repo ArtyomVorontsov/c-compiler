@@ -25,10 +25,46 @@ int main(int argc, char **argv){
 
 	lex(p);
 	printf("Lexing completed.\n\n");
-	parse();
-	printf("Parsing completed.\n\n");
+
+	struct TreeNode * root_node = parse();
+	printf("\nParsing completed.\n\n");
+
+	// Print parse tree
+	if(PRINT_PARSE_TREE_ARG || PRINT_PARSE_TREE_EXPLICIT_ARG){
+		print_parse_tree(root_node, PRINT_PARSE_TREE_EXPLICIT_ARG);
+	}
+
+	//TODO: x86 code generation
+
 
 	return 0;
+}
+
+void print_parse_tree(struct TreeNode * root_node, bool explicit){
+	printf("\n\nPrint tree:\n");
+
+	printf(" %s (%s) %d\n", root_node->type, root_node->value, root_node->children_amount);
+	print_children(root_node->children, root_node->children_amount, explicit);
+}
+
+void print_children(struct TreeNode * children[], int children_amount, bool explicit){
+	for(int i = 0; i < children_amount; i++){
+		if(explicit)
+			printf(" %s (%s) %d\t", children[i]->type, children[i]->value, children[i]->children_amount);
+		else
+			printf(" %s\t", children[i]->value);
+	}
+	printf("\n");
+
+	
+	for(int i = 0; i < children_amount; i++){
+		if(children[i]->children_amount)
+			print_children(children[i]->children, children[i]->children_amount, explicit);
+		else 
+			printf("\t");
+	}
+
+	return;
 }
 
 char * read_file(char * file_name, char * buff){

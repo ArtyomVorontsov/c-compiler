@@ -18,11 +18,20 @@ struct Token {
 struct Token * lex(char *inp);
 
 /* PARSER */
-int parse();
+struct TreeNode {
+	char * type;
+	char * value;
+	struct TreeNode * children[10];
+	int children_amount;
+};
+
+struct TreeNode * parse();
 
 /* UTILS */
 char * read_file(char * file_name, char * buff);
 bool cmpstr(char *s1, char *s2);
+void print_children(struct TreeNode * children[], int children_amount, bool explicit);
+void print_parse_tree(struct TreeNode * root_node, bool explicit);
 
 /* CONSTANTS */
 extern long FA_FAILED;
