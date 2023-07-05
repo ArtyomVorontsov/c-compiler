@@ -27,6 +27,9 @@ struct TreeNode {
 
 struct TreeNode * parse();
 
+/* GENERATE */
+void generate(struct TreeNode * root_node);
+
 /* UTILS */
 char * read_file(char * file_name, char * buff);
 bool cmpstr(char *s1, char *s2);

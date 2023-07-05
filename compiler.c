@@ -34,7 +34,7 @@ int main(int argc, char **argv){
 		print_parse_tree(root_node, PRINT_PARSE_TREE_EXPLICIT_ARG);
 	}
 
-	//TODO: x86 code generation
+	generate(root_node);
 
 
 	return 0;
