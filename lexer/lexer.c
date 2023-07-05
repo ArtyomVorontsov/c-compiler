@@ -144,14 +144,18 @@ struct Token * lex(char *inp){
 		if(token_end == (void *) FA_FAILED) token_end = tmp;
 		if(token_end != token_start) continue;
 		
-
-		printf("No lex handler c: %c d: %d\n", *token_end, *token_end);
+		
+		if(SILENT_ARG != true)
+			printf("No lex handler c: %c d: %d\n", *token_end, *token_end);
 		break;	
 	}
 
-	printf("%d Results:\n", i);
-	while(i--)
-		printf("Type: %s | Value: %s\n", tokens[i].type, tokens[i].value.string);
+	
+	if(SILENT_ARG != true){
+		printf("%d Results:\n", i);
+		while(i--)
+			printf("Type: %s | Value: %s\n", tokens[i].type, tokens[i].value.string);
+	}	
 	
 	return tokens;
 }

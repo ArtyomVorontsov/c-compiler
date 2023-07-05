@@ -39,6 +39,9 @@ void print_parse_tree(struct TreeNode * root_node, bool explicit);
 /* CONSTANTS */
 extern long FA_FAILED;
 extern struct Token tokens[100];
+
+/* PARAMS */
 extern bool PRINT_PARSE_TREE_ARG;
 extern bool PRINT_PARSE_TREE_EXPLICIT_ARG;
+extern bool SILENT_ARG;
 

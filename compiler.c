@@ -3,12 +3,15 @@
 long FA_FAILED = -2;
 struct Token tokens[100];
 char source_code_buffer[1000] = { '\0' };
+
+/* PARAMS */
 bool PRINT_PARSE_TREE_ARG = false;
 bool PRINT_PARSE_TREE_EXPLICIT_ARG = false;
+bool SILENT_ARG = false;
 
 int main(int argc, char **argv){
 	char *p = source_code_buffer;
-
+	struct TreeNode * root_node;
 	read_file(argv[1], source_code_buffer);
 
 	// Handle parameters
@@ -19,15 +22,18 @@ int main(int argc, char **argv){
 		if (cmpstr(argv[2], "--ppte")){
 			PRINT_PARSE_TREE_EXPLICIT_ARG = true;
 		} 
+		if (cmpstr(argv[2], "-s")){
+			SILENT_ARG = true;
+		} 
 	}
 
-	printf("explicit: %d\n", PRINT_PARSE_TREE_EXPLICIT_ARG);
-
 	lex(p);
-	printf("Lexing completed.\n\n");
+	if(SILENT_ARG != true)
+		printf("Lexing completed.\n\n");
 
-	struct TreeNode * root_node = parse();
-	printf("\nParsing completed.\n\n");
+	root_node = parse();
+	if(SILENT_ARG != true)
+		printf("\nParsing completed.\n\n");
 
 	// Print parse tree
 	if(PRINT_PARSE_TREE_ARG || PRINT_PARSE_TREE_EXPLICIT_ARG){
@@ -35,7 +41,8 @@ int main(int argc, char **argv){
 	}
 
 	generate(root_node);
-
+	if(SILENT_ARG != true)
+		printf("\nCode generation completed.\n\n");
 
 	return 0;
 }
