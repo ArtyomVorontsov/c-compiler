@@ -1,10 +1,14 @@
 #include "./lexer.h"
+int curr_line = 0;
+int curr_line_char = 0;
+char *new_line_ptr;
 
 struct Token * lex(char *inp){
 	char *p = inp, 
 	*token_start = inp,
 	*token_end = inp,
 	*tmp;
+	new_line_ptr = inp;
 	int i = 0;
 
 	while(*p != '\0'){
@@ -16,6 +20,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "OPEN_BRACE";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -30,6 +37,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "CLOSE_BRACE";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -44,6 +54,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "OPEN_PARENTHESIS";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -58,6 +71,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "CLOSE_PARENTHESIS";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -72,6 +88,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "SEMICOLON";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -86,6 +105,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "INT";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -101,6 +123,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "INT_KEYWORD";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -115,6 +140,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "RETURN_KEYWORD";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -130,6 +158,9 @@ struct Token * lex(char *inp){
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "IDENTIFIER";
 			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
 			i++;
 			token_end++;
 			continue;
@@ -154,15 +185,24 @@ struct Token * lex(char *inp){
 	if(SILENT_ARG != true){
 		printf("%d Results:\n", i);
 		while(i--)
-			printf("Type: %s | Value: %s\n", tokens[i].type, tokens[i].value.string);
+			printf("Type: %s | Value: %s | line: %d | line char: %d\n", 
+				tokens[i].type, 
+				tokens[i].value.string, 
+				tokens[i].position.line, 
+				tokens[i].position.line_char
+			);
 	}	
 	
 	return tokens;
 }
-/* WHITESPACE FA */
 
+/* WHITESPACE FA */
 char * machine_WHITESPACE_FA(char *p){
-	while((*p == ' ') || (*p == '\t') || (*p == '\n')) p++;
+	while((*p == ' ') || (*p == '\t') || (*p == '\n')) {
+		if(*p == '\n') set_new_line(p);
+		p++;
+	}
+
 	return p;
 } 
 
@@ -457,5 +497,10 @@ void cpy_str(char *from, char *to, char *buff, int buff_size){
 		buff++;
 		i++;
 	}
+}
+
+void set_new_line(char *p){
+	new_line_ptr = p;
+	curr_line++;
 }
 

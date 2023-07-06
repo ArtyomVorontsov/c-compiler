@@ -32,4 +32,5 @@ char * machine_SEMICOLON_FA(char *p);
 
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
+void set_new_line(char *p);
 

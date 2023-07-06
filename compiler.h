@@ -10,9 +10,15 @@ union Value {
 	char string[100];
 };
 
+struct Position {
+	int line;
+	int line_char;
+};
+
 struct Token {
 	char *type;
 	union Value value;
+	struct Position position;
 };
 
 struct Token * lex(char *inp);
