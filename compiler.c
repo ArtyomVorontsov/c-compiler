@@ -3,6 +3,7 @@
 long FA_FAILED = -2;
 struct Token tokens[100];
 char source_code_buffer[1000] = { '\0' };
+char asm_buffer[10000] = { '\0' };
 
 /* PARAMS */
 bool PRINT_PARSE_TREE_ARG = false;
@@ -39,18 +40,28 @@ int main(int argc, char **argv){
 	if(PRINT_PARSE_TREE_ARG || PRINT_PARSE_TREE_EXPLICIT_ARG){
 		print_parse_tree(root_node, PRINT_PARSE_TREE_EXPLICIT_ARG);
 	}
-	// TODO: Generate should return buffer with assembly
+
 	generate(root_node);
 	if(SILENT_ARG != true)
 		printf("\nCode generation completed.\n\n");
 
 	
-	// TODO: Created file should have the same same as opened one just without extension (.c)
+	// Created file should have the same name as opened one just without extension (.c)
+	char output_file_name[100] = { '\0' };
+	char * output_file_name_ptr = output_file_name;
+	char * source_file_name_ptr = argv[1];
+
+	while(*source_file_name_ptr != '\0'){
+		*output_file_name_ptr++ = *source_file_name_ptr++;
+	}
+	while(*output_file_name_ptr != '.') output_file_name_ptr--;
+	*output_file_name_ptr = '\0';
+
+	output_file_name_ptr = output_file_name;
+	// Write assembly to file
 	FILE *fp;
-	fp = fopen("./program", "w");
-
-	// TODO: Write here assembly to file
-
+	fp = fopen(output_file_name_ptr, "w");
+	fprintf(fp, "%s", asm_buffer);
 	fclose(fp);
 
 
