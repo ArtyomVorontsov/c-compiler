@@ -1,28 +1,18 @@
 #include "./parser.h"
 
-
-struct TreeNode * create_node(char *type, char *value);
-bool Program();
-bool Function();
-bool Statement();
-bool Expression();
-bool Type();
-bool Identifier();
-bool Match(char *type);
-void remove_node_from_deepest();
-void set_node_as_deepest(struct TreeNode * current_node);
-void set_as_child(struct TreeNode * current_node);
-
 struct TreeNode * nodes_stack[100];
 struct TreeNode ** pns = nodes_stack;
 struct Token * pt = tokens;
+int error_tree_depth = -1;
+struct Token * error_token;
+
 
 struct TreeNode * parse(){
 	bool match;
 	*pns = nodes_stack[0];
 
 	match = Program();
-	if(!match) printf("ERROR!!!\n");
+	if(!match) printf("ERROR: Parsing is failed at line %d:%d. After '%s'\n", error_token->position.line, error_token->position.line_char, error_token->value.string), exit(1);
 	struct TreeNode * root_node = nodes_stack[0];
 
 	return root_node;
@@ -39,6 +29,7 @@ bool Program(){
 	remove_node_from_deepest();	
 
 	if(match) return true;
+	set_error();
 
 	return false;
 }
@@ -58,6 +49,7 @@ bool Function(){
 	remove_node_from_deepest();	
 
 	if(match) return true;
+	set_error();
 
 	return false;
 }
@@ -74,6 +66,7 @@ bool Statement(){
 	remove_node_from_deepest();	
 
 	if(match) return true;
+	set_error();
 
 	return false;
 }
@@ -90,6 +83,7 @@ bool Expression(){
 	remove_node_from_deepest();	
 
 	if(match) return true;
+	set_error();
 
 	return false;
 }
@@ -106,6 +100,7 @@ bool Type(){
 	remove_node_from_deepest();
 
 	if(match) return true;
+	set_error();
 
 	return false;
 }
@@ -117,6 +112,7 @@ bool Identifier(){
 	match = Match("IDENTIFIER");
 
 	if(match) return true;
+	set_error();
 
 	return false;
 }
@@ -128,6 +124,9 @@ bool Match(char *type){
 		pt++;
 		return true;
 	}
+
+	set_error();
+
 	return false;
 }
 
@@ -158,5 +157,14 @@ struct TreeNode * create_node(char *type, char *value){
 	node->value = value;
 	node->children_amount = 0;
 	return node;
+}
+
+void set_error(){
+	int curr_error_token_depth = pns - nodes_stack;
+
+	if(curr_error_token_depth > error_tree_depth) {
+		error_tree_depth = curr_error_token_depth;
+		error_token = pt - 1;
+	}
 }
 
