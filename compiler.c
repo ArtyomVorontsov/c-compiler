@@ -39,10 +39,20 @@ int main(int argc, char **argv){
 	if(PRINT_PARSE_TREE_ARG || PRINT_PARSE_TREE_EXPLICIT_ARG){
 		print_parse_tree(root_node, PRINT_PARSE_TREE_EXPLICIT_ARG);
 	}
-
+	// TODO: Generate should return buffer with assembly
 	generate(root_node);
 	if(SILENT_ARG != true)
 		printf("\nCode generation completed.\n\n");
+
+	
+	// TODO: Created file should have the same same as opened one just without extension (.c)
+	FILE *fp;
+	fp = fopen("./program", "w");
+
+	// TODO: Write here assembly to file
+
+	fclose(fp);
+
 
 	return 0;
 }
