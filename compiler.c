@@ -55,6 +55,8 @@ int main(int argc, char **argv){
 		*output_file_name_ptr++ = *source_file_name_ptr++;
 	}
 	while(*output_file_name_ptr != '.') output_file_name_ptr--;
+	*output_file_name_ptr++;
+	*output_file_name_ptr++ = 's';
 	*output_file_name_ptr = '\0';
 
 	output_file_name_ptr = output_file_name;
@@ -63,7 +65,6 @@ int main(int argc, char **argv){
 	fp = fopen(output_file_name_ptr, "w");
 	fprintf(fp, "%s", asm_buffer);
 	fclose(fp);
-
 
 	return 0;
 }
