@@ -118,7 +118,7 @@ bool Identifier(){
 }
 
 bool Match(char *type){
-	if(cmpstr((*pt).type, type)){
+	if((*pt).type && cmpstr((*pt).type, type)){
 		struct TreeNode * node = create_node((*pt).type, (*pt).value.string);
  		set_as_child(node);
 		pt++;

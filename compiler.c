@@ -113,6 +113,7 @@ char * read_file(char * file_name, char * buff){
 bool cmpstr(char *s1, char *s2){
 	bool is_equal = true;
 	int str_len = 0;
+
 	while(*(s1 + str_len++) != '\0');
 
 	while(str_len--){
