@@ -39,7 +39,7 @@ void generate(struct TreeNode * root_node);
 /* UTILS */
 char * read_file(char * file_name, char * buff);
 bool cmpstr(char *s1, char *s2);
-void print_children(struct TreeNode * children[], int children_amount, bool explicit);
+void print_children(struct TreeNode * children[], int children_amount, int depth, bool explicit);
 void print_parse_tree(struct TreeNode * root_node, bool explicit);
 
 /* CONSTANTS */

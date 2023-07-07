@@ -70,29 +70,38 @@ int main(int argc, char **argv){
 }
 
 void print_parse_tree(struct TreeNode * root_node, bool explicit){
+	int depth = 0;
+
 	printf("\n\nPrint tree:\n");
 
-	printf(" %s (%s) %d\n", root_node->type, root_node->value, root_node->children_amount);
-	print_children(root_node->children, root_node->children_amount, explicit);
+	printf("|-- %s (%s) %d\n", root_node->type, root_node->value, root_node->children_amount);
+	print_children(root_node->children, root_node->children_amount, depth, explicit);
 }
 
-void print_children(struct TreeNode * children[], int children_amount, bool explicit){
-	for(int i = 0; i < children_amount; i++){
-		if(explicit)
-			printf(" %s (%s) %d\t", children[i]->type, children[i]->value, children[i]->children_amount);
-		else
-			printf(" %s\t", children[i]->value);
-	}
-	printf("\n");
-
+void print_children(struct TreeNode * children[], int children_amount, int depth, bool explicit){
+	int j = 0;
+	depth++;
 	
+	while(j++ < depth) printf("\t");
+	j = 0;
+	printf("Tree depth: %d\n", depth);
+
 	for(int i = 0; i < children_amount; i++){
+		while(j++ < depth) printf("\t");
+		j = 0;
+
+		printf("|-- ");
+		if(explicit)
+			printf("%s ('%s') %d\n", children[i]->type, children[i]->value, children[i]->children_amount);
+		else
+			printf(" %s\n", children[i]->value);
+
+
 		if(children[i]->children_amount)
-			print_children(children[i]->children, children[i]->children_amount, explicit);
-		else 
-			printf("\t");
+			print_children(children[i]->children, children[i]->children_amount, depth, explicit);
 	}
 
+	depth--;
 	return;
 }
 
