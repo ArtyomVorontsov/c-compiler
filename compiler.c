@@ -8,7 +8,7 @@ char asm_buffer[10000] = { '\0' };
 /* PARAMS */
 bool PRINT_PARSE_TREE_ARG = false;
 bool PRINT_PARSE_TREE_EXPLICIT_ARG = false;
-bool SILENT_ARG = false;
+bool SILENT_ARG = true;
 
 int main(int argc, char **argv){
 	char *p = source_code_buffer;
@@ -23,8 +23,8 @@ int main(int argc, char **argv){
 		if (cmpstr(argv[2], "--ppte")){
 			PRINT_PARSE_TREE_EXPLICIT_ARG = true;
 		} 
-		if (cmpstr(argv[2], "-s")){
-			SILENT_ARG = true;
+		if (cmpstr(argv[2], "-e")){
+			SILENT_ARG = false;
 		} 
 	}
 
