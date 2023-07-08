@@ -29,8 +29,13 @@ char * machine_CLOSE_PARENTHESIS_FA(char *p);
 
 char * machine_SEMICOLON_FA(char *p);
 
+/* OPERATORS FA */
+char * machine_NEGATION_OP_FA(char *p);
+char * machine_BITWISE_COMPLEMENT_OP_FA(char *p);
+char * machine_LOGICAL_NEGATION_OP_FA(char *p);
 
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 void set_new_line(char *p);
+void set_token(char * type, int i, char * token_start, char * token_end);
 
