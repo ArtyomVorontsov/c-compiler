@@ -150,6 +150,58 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* OPERATORS */
+
+		/* NEGATION */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_NEGATION_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "NEGATION_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* BITWISE COMPLEMENT */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_BITWISE_COMPLEMENT_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "BITWISE_COMPLEMENT_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* LOGICAL NEGATION */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_LOGICAL_NEGATION_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "LOGICAL_NEGATION_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
@@ -487,6 +539,38 @@ char * machine_step7_RETURN_KEYWORD_FA(char *p){
 	}	
 }
 
+/* OPERATORS */
+
+/* NEGATION OP FA */
+char * machine_NEGATION_OP_FA(char *p) {
+	switch (*p){
+		case '-': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* BITWISE COMPLEMENT OP FA */
+char * machine_BITWISE_COMPLEMENT_OP_FA(char *p) {
+	switch (*p){
+		case '~': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* LOGICAL NEGATION OP FA */
+char * machine_LOGICAL_NEGATION_OP_FA(char *p) {
+	switch (*p){
+		case '!': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
 /* UTILS */
 
 void cpy_str(char *from, char *to, char *buff, int buff_size){
@@ -502,5 +586,15 @@ void cpy_str(char *from, char *to, char *buff, int buff_size){
 void set_new_line(char *p){
 	new_line_ptr = p;
 	curr_line++;
+}
+
+void set_token(char * type, int i, char * token_start, char * token_end){
+	tokens[i].type = type;
+	cpy_str(token_start, token_end, tokens[i].value.string, 100);
+	curr_line_char = token_start - new_line_ptr;
+	tokens[i].position.line = curr_line;
+	tokens[i].position.line_char += curr_line_char;
+	i++;
+	token_end++;
 }
 
