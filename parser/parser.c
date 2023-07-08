@@ -12,7 +12,15 @@ struct TreeNode * parse(){
 	*pns = nodes_stack[0];
 
 	match = Program();
-	if(!match) printf("ERROR: Parsing is failed at line %d:%d. After '%s'\n", error_token->position.line, error_token->position.line_char, error_token->value.string), exit(1);
+	if(!match) 
+		printf(
+			"ERROR: Parsing is failed at line %d:%d. After '%s'\n", 
+			error_token->position.line, 
+			error_token->position.line_char, 
+			error_token->value.string
+		), 
+		exit(1);
+
 	struct TreeNode * root_node = nodes_stack[0];
 
 	return root_node;
@@ -25,7 +33,9 @@ bool Program(){
 	struct TreeNode * root_node = nodes_stack[0];
 
 	set_node_as_deepest(node);
+
 	match = Function();
+
 	remove_node_from_deepest();	
 
 	if(match) return true;
@@ -41,12 +51,15 @@ bool Function(){
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	match = Type() && Identifier() && Match("OPEN_PARENTHESIS") && Match("CLOSE_PARENTHESIS") && Match("OPEN_BRACE") && Statement() && Match("CLOSE_BRACE");
+	match = Type() && 
+		Identifier() && 
+		Match("OPEN_PARENTHESIS") && 
+		Match("CLOSE_PARENTHESIS") && 
+		Match("OPEN_BRACE") && 
+		Statement() && 
+		Match("CLOSE_BRACE");
 
-		
-	struct TreeNode * root_node = nodes_stack[0];
-	
-	remove_node_from_deepest();	
+	remove_node_from_deepest();
 
 	if(match) return true;
 	set_error();
@@ -72,17 +85,51 @@ bool Statement(){
 }
 
 bool Expression(){
-	bool match;
+	struct Token * next = pt;
 
 	struct TreeNode *node = create_node("EXPRESSION", "EXPRESSION");
  	set_as_child(node);
 	set_node_as_deepest(node);
+	
+	if(pt = next, Match("INT")){
+		remove_node_from_deepest();	
+		return true;
 
-	match = Match("INT");
+	} 
+	else if (pt = next, Unary_OP() && Expression()){
+		remove_node_from_deepest();	
+		return true;
+	}
 
 	remove_node_from_deepest();	
 
-	if(match) return true;
+	set_error();
+
+	return false;
+}
+
+bool Unary_OP(){
+	struct Token * next = pt;
+
+	struct TreeNode *node = create_node("UNARY_OP", "UNARY_OP");
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(pt = next, Match("NEGATION_OP")){
+		remove_node_from_deepest();	
+		return true;
+	} 
+	else if (pt = next, Match("BITWISE_COMPLEMENT_OP")){
+		remove_node_from_deepest();	
+		return true;
+	} 
+	else if (pt = next, Match("LOGICAL_NEGATION_OP")){
+		remove_node_from_deepest();	
+		return true;
+	}
+
+	remove_node_from_deepest();
+
 	set_error();
 
 	return false;
@@ -118,8 +165,8 @@ bool Identifier(){
 }
 
 bool Match(char *type){
-	if((*pt).type && cmpstr((*pt).type, type)){
-		struct TreeNode * node = create_node((*pt).type, (*pt).value.string);
+	if(pt->type && cmpstr(pt->type, type)){
+		struct TreeNode * node = create_node(pt->type, pt->value.string);
  		set_as_child(node);
 		pt++;
 		return true;
@@ -150,7 +197,6 @@ void remove_node_from_deepest(){
 }
 
 struct TreeNode * create_node(char *type, char *value){
-	//(TreeNode *) 
 	struct TreeNode *node;
 	node = (struct TreeNode *) malloc(sizeof(struct TreeNode));
 	node->type = type;

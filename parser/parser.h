@@ -7,6 +7,7 @@ bool Statement();
 bool Expression();
 bool Type();
 bool Identifier();
+bool Unary_OP();
 bool Match(char *type);
 void remove_node_from_deepest();
 void set_node_as_deepest(struct TreeNode * current_node);
