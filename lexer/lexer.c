@@ -459,6 +459,11 @@ char * machine_step2_INT_FA(char *p){
 			return machine_step2_INT_FA(p + 1);
 		case ' ':
 		case ';':
+		case '-':
+		case '+':
+		case '/':
+		case '*':
+		case ')':
 		case '\n':
 		case '\t':
 			return p - 1;

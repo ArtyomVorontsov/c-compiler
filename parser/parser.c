@@ -112,10 +112,7 @@ bool Expression(){
 			if(lookahead_is_bin_op){
 				if((Match("ADDITION_OP") || Match("NEGATION_OP")) && Term()){
 					success = true;
-				} 
-				else if (node->children_amount = 0, pt = next, Term()){
-					success = true;
-				}
+				} 	
 			} else {
 				break;
 			}
@@ -157,8 +154,6 @@ bool Term(){
 
 	// At least 1 Factor production will be invoked
 	if(node->children_amount = 0, pt = next, Factor()){
-
-		
 		lookahead = pt;
 		lookahead_is_bin_op = lookahead->type && 
 		(cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
@@ -197,8 +192,6 @@ bool Factor(){
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("FACTOR", "FACTOR");
 
-	printf("FACTOR %s\n", pt->type);
-
  	set_as_child(node);
 	set_node_as_deepest(node);
 
@@ -206,7 +199,7 @@ bool Factor(){
 		remove_node_from_deepest();	
 		return true;
 	} 
-	else if (node->children_amount = 0, pt = next, Unary_OP() && Expression()){
+	else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
 		remove_node_from_deepest();	
 		return true;
 	}
@@ -215,7 +208,6 @@ bool Factor(){
 		return true;
 	}
 
-	printf("FACTOR ERROR\n");
 	remove_node_from_deepest();	
 
 	set_error();
@@ -252,9 +244,8 @@ bool Unary_OP(){
 
 bool Binary_OP(){
 	struct Token * next = pt;
+	struct TreeNode *node = create_node("BINARY_OP", "BINARY_OP");
 
-	printf("BINARY_OP\n");
-	struct TreeNode *node = create_node("UNARY_OP", "UNARY_OP");
  	set_as_child(node);
 	set_node_as_deepest(node);
 
@@ -264,7 +255,6 @@ bool Binary_OP(){
 	} 
 	else if (node->children_amount = 0, pt = next, Match("ADDITION_OP")){
 		remove_node_from_deepest();	
-		printf("ADDITION\n");
 		return true;
 	} 
 	else if (node->children_amount = 0, pt = next, Match("MULTIPLICATION_OP")){
