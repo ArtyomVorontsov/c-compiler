@@ -27,7 +27,7 @@ struct Token * lex(char *inp);
 struct TreeNode {
 	char * type;
 	char * value;
-	struct TreeNode * children[10];
+	struct TreeNode * children[100];
 	int children_amount;
 };
 

@@ -31,6 +31,9 @@ char * machine_SEMICOLON_FA(char *p);
 
 /* OPERATORS FA */
 char * machine_NEGATION_OP_FA(char *p);
+char * machine_ADDITION_OP_FA(char *p);
+char * machine_MULTIPLICATION_OP_FA(char *p);
+char * machine_DIVISION_OP_FA(char *p);
 char * machine_BITWISE_COMPLEMENT_OP_FA(char *p);
 char * machine_LOGICAL_NEGATION_OP_FA(char *p);
 

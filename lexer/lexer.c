@@ -169,6 +169,58 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* ADDITION */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_ADDITION_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "ADDITION_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+
+		/* MULTIPLICATION */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_MULTIPLICATION_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "MULTIPLICATION_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* DIVISION */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_DIVISION_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "DIVISION_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* BITWISE COMPLEMENT */
 		tmp = token_end;
 		token_start = token_end;
@@ -565,6 +617,36 @@ char * machine_BITWISE_COMPLEMENT_OP_FA(char *p) {
 char * machine_LOGICAL_NEGATION_OP_FA(char *p) {
 	switch (*p){
 		case '!': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* ADDITION OP FA */
+char * machine_ADDITION_OP_FA(char *p) {
+	switch (*p){
+		case '+': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* MULTIPLICATION OP FA */
+char * machine_MULTIPLICATION_OP_FA(char *p) {
+	switch (*p){
+		case '*': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* DIVISION OP FA */
+char * machine_DIVISION_OP_FA(char *p) {
+	switch (*p){
+		case '/': 
 			return p;
 		default:
 			return (void *) FA_FAILED;
