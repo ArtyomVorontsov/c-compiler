@@ -96,6 +96,7 @@ bool Expression(){
 
 	// At least 1 Term production will be invoked
 	if((node->children_amount = 0, pt = next, Term())){
+		success = true;
 		lookahead = pt;
 		lookahead_is_bin_op = lookahead->type && 
 		(
@@ -112,7 +113,9 @@ bool Expression(){
 			if(lookahead_is_bin_op){
 				if((Match("ADDITION_OP") || Match("NEGATION_OP")) && Term()){
 					success = true;
-				} 	
+				} else {
+					success = false;
+				}
 			} else {
 				break;
 			}
@@ -127,13 +130,9 @@ bool Expression(){
 			);
 		}
 		remove_node_from_deepest();	
-		return true;
+		return success;
 
-	} else if(node->children_amount = 0, pt = next, Term()){
-		remove_node_from_deepest();	
-		return true;
-	}
-
+	} 
 
 	remove_node_from_deepest();	
 
@@ -154,6 +153,7 @@ bool Term(){
 
 	// At least 1 Factor production will be invoked
 	if(node->children_amount = 0, pt = next, Factor()){
+		success = true;
 		lookahead = pt;
 		lookahead_is_bin_op = lookahead->type && 
 		(cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
@@ -166,7 +166,9 @@ bool Term(){
 			if(lookahead_is_bin_op){
 				if((Match("MULTIPLICATION_OP") || Match("DIVISION_OP")) && Factor()){
 					success = true;
-				} 
+				} else {
+					success = false;
+				}
 			} else {
 				break;
 			}
@@ -178,7 +180,7 @@ bool Term(){
 		}
 		remove_node_from_deepest();	
 
-		return true;
+		return success;
 	} 
 
 	remove_node_from_deepest();	
