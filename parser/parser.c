@@ -86,53 +86,24 @@ bool Statement(){
 
 bool Expression(){
 	struct Token * next = pt;
-	struct Token * lookahead = pt + 1;
-	bool lookahead_is_bin_op = false;
-	bool success = false;
-
 	struct TreeNode *node = create_node("EXPRESSION", "EXPRESSION");
+
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	// At least 1 Term production will be invoked
-	if((node->children_amount = 0, pt = next, Term())){
-		success = true;
-		lookahead = pt;
-		lookahead_is_bin_op = lookahead->type && 
-		(
-		 cmpstr(lookahead->type, "ADDITION_OP") ||
-		 cmpstr(lookahead->type, "NEGATION_OP") ||
-		 cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-		 cmpstr(lookahead->type, "DIVISION_OP")
-		);
-
-		while(lookahead_is_bin_op){
-			next = pt;
-			
-			// Invoke binary op productions
-			if(lookahead_is_bin_op){
-				if((Match("ADDITION_OP") || Match("NEGATION_OP")) && Term()){
-					success = true;
-				} else {
-					success = false;
-				}
-			} else {
-				break;
-			}
-
-			lookahead = pt;
-			lookahead_is_bin_op = lookahead->type && 
-			(
-			 cmpstr(lookahead->type, "ADDITION_OP") ||
-			 cmpstr(lookahead->type, "NEGATION_OP") ||
-			 cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-			 cmpstr(lookahead->type, "DIVISION_OP")
-			);
-		}
+	if(node->children_amount = 0, pt = next, Binary_exp()){
 		remove_node_from_deepest();	
-		return success;
-
+		return true;
 	} 
+	else if (node->children_amount = 0, Binary_exp_2()){
+		remove_node_from_deepest();
+		return true;
+	}
+	else if (node->children_amount = 0, pt = next, Match("INT")){
+		remove_node_from_deepest();
+		return true;
+	}
+
 
 	remove_node_from_deepest();	
 
@@ -141,47 +112,71 @@ bool Expression(){
 	return false;
 }
 
+bool Binary_exp(){
+	struct Token * next = pt;
+	struct TreeNode *node = create_node("BINARY_EXP", "BINARY_EXP");
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(node->children_amount = 0, pt = next, Term() && (Match("ADDITION_OP") || Match("NEGATION_OP")) && Term_r()){
+		return true;
+	}
+
+	remove_node_from_deepest();	
+
+	set_error();
+
+	return false;
+}
+
+bool Binary_exp_2(){
+	struct Token * next = pt;
+	struct TreeNode *node = create_node("BINARY_EXP_2", "BINARY_EXP_2");
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(node->children_amount = 0, pt = next, Term() && (Match("MULTIPLICATION_OP") || Match("DIVISION_OP")) && Term_r()){
+		return true;
+	}
+
+	remove_node_from_deepest();	
+
+	set_error();
+
+	return false;
+}
 bool Term(){
 	struct Token * next = pt;
-	struct Token * lookahead = pt + 1;
-	bool lookahead_is_bin_op = false;
-	bool success = false;
 	struct TreeNode *node = create_node("TERM", "TERM");
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	// At least 1 Factor production will be invoked
-	if(node->children_amount = 0, pt = next, Factor()){
-		success = true;
-		lookahead = pt;
-		lookahead_is_bin_op = lookahead->type && 
-		(cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-		 cmpstr(lookahead->type, "DIVISION_OP"));
-
-		// Invoke binary op productions
-		while(lookahead_is_bin_op){
-			next = pt;
-		
-			if(lookahead_is_bin_op){
-				if((Match("MULTIPLICATION_OP") || Match("DIVISION_OP")) && Factor()){
-					success = true;
-				} else {
-					success = false;
-				}
-			} else {
-				break;
-			}
+	if(node->children_amount = 0, pt = next, Binary_exp_2() && Factor()){
+		return true;
+	}
 	
-			lookahead = pt;
-			lookahead_is_bin_op = lookahead->type && 
-			(cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-			 cmpstr(lookahead->type, "DIVISION_OP"));
-		}
-		remove_node_from_deepest();	
 
-		return success;
-	} 
+	remove_node_from_deepest();	
+
+	set_error();
+
+	return false;
+}
+
+bool Term_r(){
+	struct Token * next = pt;
+	struct TreeNode *node = create_node("TERM_R", "TERM_R");
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(node->children_amount = 0, pt = next, Binary_exp() && Factor_r()){
+		return true;
+	}
+	
 
 	remove_node_from_deepest();	
 
@@ -197,12 +192,35 @@ bool Factor(){
  	set_as_child(node);
 	set_node_as_deepest(node);
 
+	if (node->children_amount = 0, pt = next, Match("INT")){
+		remove_node_from_deepest();
+		return true;
+	}
+
+	remove_node_from_deepest();	
+
+	set_error();
+
+	return false;
+}
+
+bool Factor_r(){
+	struct Token * next = pt;
+	struct TreeNode *node = create_node("FACTOR_R", "FACTOR_R");
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
 	if(node->children_amount = 0, pt = next, Match("OPEN_PARENTHESIS") && Expression() && Match("CLOSE_PARENTHESIS")){
 		remove_node_from_deepest();	
 		return true;
 	} 
 	else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
 		remove_node_from_deepest();	
+		return true;
+	}
+	else if (node->children_amount = 0, Binary_exp_2()){
+		remove_node_from_deepest();
 		return true;
 	}
 	else if (node->children_amount = 0, pt = next, Match("INT")){
@@ -216,6 +234,7 @@ bool Factor(){
 
 	return false;
 }
+
 
 bool Unary_OP(){
 	struct Token * next = pt;
