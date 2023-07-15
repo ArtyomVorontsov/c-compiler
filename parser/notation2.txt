@@ -1,0 +1,21 @@
+
+<exp> ::= <binary_exp> | <binary_exp2> | <term>
+
+---
+
+<binary_exp> ::= <term_l> ("+" | "-") <term> 
+
+<term> ::= <binary_exp2> | <factor>
+
+<term_l> ::= <binary_exp> | <factor_l>
+
+---
+
+<binary_exp2> ::= <factor_l> ("*" | "/") <factor>
+
+<factor> ::= <int>
+
+<factor_l> ::= "(" <exp> ")" | <unary_op> <factor_r> | <binary_exp2> | <int> 
+
+1 + 2 + 3
+

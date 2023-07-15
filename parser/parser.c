@@ -28,6 +28,7 @@ struct TreeNode * parse(){
 
 
 bool Program(){
+	printf("PROGRAM\n");
 	struct TreeNode *node = create_node("PROGRAM", "PROGRAM");
 	bool match;
 	struct TreeNode * root_node = nodes_stack[0];
@@ -45,6 +46,7 @@ bool Program(){
 }
 
 bool Function(){
+	printf("FUNCTION\n");
 	struct TreeNode *node = create_node("FUNCTION", "FUCTION");
 	bool match;
 
@@ -68,6 +70,7 @@ bool Function(){
 }
 
 bool Statement(){
+	printf("STATEMENT\n");
 	bool match;
 
 	struct TreeNode * node = create_node("STATEMENT", "STATEMENT");
@@ -85,6 +88,7 @@ bool Statement(){
 }
 
 bool Expression(){
+	printf("EXPRESSION\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("EXPRESSION", "EXPRESSION");
 
@@ -95,11 +99,11 @@ bool Expression(){
 		remove_node_from_deepest();	
 		return true;
 	} 
-	else if (node->children_amount = 0, Binary_exp_2()){
+	else if (node->children_amount = 0, pt = next, Binary_exp_2()){
 		remove_node_from_deepest();
 		return true;
 	}
-	else if (node->children_amount = 0, pt = next, Match("INT")){
+	else if (node->children_amount = 0, pt = next, Term()){
 		remove_node_from_deepest();
 		return true;
 	}
@@ -113,6 +117,7 @@ bool Expression(){
 }
 
 bool Binary_exp(){
+	printf("BINARY_EXP\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("BINARY_EXP", "BINARY_EXP");
 
@@ -120,6 +125,7 @@ bool Binary_exp(){
 	set_node_as_deepest(node);
 
 	if(node->children_amount = 0, pt = next, Term() && (Match("ADDITION_OP") || Match("NEGATION_OP")) && Term_r()){
+		remove_node_from_deepest();
 		return true;
 	}
 
@@ -131,13 +137,15 @@ bool Binary_exp(){
 }
 
 bool Binary_exp_2(){
+	printf("BINARY_EXP_2\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("BINARY_EXP_2", "BINARY_EXP_2");
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	if(node->children_amount = 0, pt = next, Term() && (Match("MULTIPLICATION_OP") || Match("DIVISION_OP")) && Term_r()){
+	if(node->children_amount = 0, pt = next, Factor() && (Match("MULTIPLICATION_OP") || Match("DIVISION_OP")) && Factor_r()){
+		remove_node_from_deepest();
 		return true;
 	}
 
@@ -148,13 +156,19 @@ bool Binary_exp_2(){
 	return false;
 }
 bool Term(){
+	printf("TERM\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("TERM", "TERM");
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	if(node->children_amount = 0, pt = next, Binary_exp_2() && Factor()){
+	if (node->children_amount = 0, pt = next, Binary_exp_2()){
+		remove_node_from_deepest();
+		return true;
+	}
+	else if (node->children_amount = 0, pt = next, Factor()){
+		remove_node_from_deepest();
 		return true;
 	}
 	
@@ -167,13 +181,19 @@ bool Term(){
 }
 
 bool Term_r(){
+	printf("TERM_R\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("TERM_R", "TERM_R");
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	if(node->children_amount = 0, pt = next, Binary_exp() && Factor_r()){
+	if (node->children_amount = 0, pt = next, Binary_exp()){
+		remove_node_from_deepest();
+		return true;
+	}
+	else if (node->children_amount = 0, pt = next, Factor_r()){
+		remove_node_from_deepest();
 		return true;
 	}
 	
@@ -186,6 +206,7 @@ bool Term_r(){
 }
 
 bool Factor(){
+	printf("FACTOR\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("FACTOR", "FACTOR");
 
@@ -196,6 +217,14 @@ bool Factor(){
 		remove_node_from_deepest();
 		return true;
 	}
+	else if(node->children_amount = 0, pt = next, Match("OPEN_PARENTHESIS") && Expression() && Match("CLOSE_PARENTHESIS")){
+		remove_node_from_deepest();	
+		return true;
+	}  
+	else if (node->children_amount = 0, pt = next, Unary_OP() && Factor_r()){
+		remove_node_from_deepest();	
+		return true;
+	} 
 
 	remove_node_from_deepest();	
 
@@ -205,6 +234,7 @@ bool Factor(){
 }
 
 bool Factor_r(){
+	printf("FACTOR_R\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("FACTOR_R", "FACTOR_R");
 
@@ -215,11 +245,11 @@ bool Factor_r(){
 		remove_node_from_deepest();	
 		return true;
 	} 
-	else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
+	else if (node->children_amount = 0, pt = next, Unary_OP() && Factor_r()){
 		remove_node_from_deepest();	
 		return true;
 	}
-	else if (node->children_amount = 0, Binary_exp_2()){
+	else if (node->children_amount = 0, pt = next, Binary_exp_2()){
 		remove_node_from_deepest();
 		return true;
 	}
@@ -264,6 +294,7 @@ bool Unary_OP(){
 }
 
 bool Binary_OP(){
+	printf("BINARY_OP\n");
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("BINARY_OP", "BINARY_OP");
 
@@ -296,6 +327,7 @@ bool Binary_OP(){
 
 
 bool Type(){
+	printf("TYPE\n");
 	bool match;
 
 	struct TreeNode *node = create_node("TYPE", "TYPE");
@@ -314,6 +346,7 @@ bool Type(){
 
 
 bool Identifier(){
+	printf("IDENTIFIER\n");
 	bool match;
 
 	match = Match("IDENTIFIER");
@@ -325,6 +358,7 @@ bool Identifier(){
 }
 
 bool Match(char *type){
+	printf("MATCH %s, %s\n", pt->type, type);
 	if(pt->type && cmpstr(pt->type, type)){
 		struct TreeNode * node = create_node(pt->type, pt->value.string);
  		set_as_child(node);

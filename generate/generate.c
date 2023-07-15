@@ -1,6 +1,7 @@
 #include "./generate.h"
 
 char * asm_buffer_ptr = asm_buffer;
+struct TreeNode * curr_node_ptr;
 
 void generate(struct TreeNode * root_node){
 	generate_program(root_node->children[0]);
@@ -50,55 +51,96 @@ void generate_statement(struct TreeNode * node){
 
 void generate_expression(struct TreeNode ** node){
 	printf("generate_expression\n");
-	//printf("generate_expression %s\n", (**node).type);
 	struct TreeNode * child_node;
 
-	for(int i = 0; i < (*node)->children_amount - 1; i++){
-		child_node = (*node)->children[i];
+	child_node = (*node)->children[0];
+
+	if(strcmp(child_node->type, "EXPRESSION") == 0) {
+		generate_expression(&child_node);
+	}
+
+	if(strcmp(child_node->type, "TERM") == 0) {
+		generate_term(child_node);
+	}
+	else {
+		if(SILENT_ARG != true)
+			printf("No handler\n");
+	}
+}
 
 
-		if(strcmp(child_node->type, "EXPRESSION") == 0) {
-			generate_expression(&child_node);
-		}
+int generate_term(struct TreeNode * node){
+	printf("generate_term\n");
+	struct TreeNode * child_node = node->children[0];
 
-		printf("%d\n", i);
-		printf("generate_expression %s\n", (*node)->children[i + 1]->type);
-		if(strcmp(child_node->type, "TERM") == 0) {
+	if(strcmp(child_node->type, "FACTOR") == 0) {
+		generate_fact(child_node);
+	}
+}
 
-			if(strcmp((*node)->children[i + 1]->type, "ADDITION_OP") == 0) {
-				printf("ADDITION %s\n", child_node->type);
-				generate_fact((*node)->children[i]);
-				asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
-				generate_fact((*node)->children[i + 2]);
-				asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
-				asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx %%eax\n");
-				node = node + 3;
-				printf("DONE\n");
-			}
-//			generate_term(&child_node);
-		}
-		else {
-			if(SILENT_ARG != true)
-				printf("No handler\n");
-		}
+int generate_term_r(struct TreeNode * node){
+	printf("generate_term_r\n");
+	struct TreeNode * child_node = node->children[0];
+
+	if(strcmp(child_node->type, "FACTOR_R") == 0) {
+		generate_fact(child_node);
+	}
+}
+
+void generate_fact(struct TreeNode * node){
+	printf("generate_fact\n");
+	printf("%s\n", node->children[0]->type);
+
+	struct TreeNode * child_node = node->children[0];
+
+	if(strcmp(child_node->type, "UNARY_OP") == 0) {
+		generate_unary_op(child_node);
+	}
+
+	if(strcmp(child_node->type, "FACTOR_R") == 0) {
+		generate_fact_r(child_node);
+	}
+
+	if(strcmp(child_node->type, "INT") == 0) {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);
+	}
+
+}
+
+
+void generate_fact_r(struct TreeNode * node){
+	printf("generate_fact_r\n");
+
+	struct TreeNode * child_node = node->children[0];
+	printf("%s\n", child_node->type);
+
+	if(strcmp(child_node->type, "UNARY_OP") == 0) {
+		generate_unary_op(child_node);
+	}
+
+	if(strcmp(child_node->type, "INT") == 0) {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);
 	}
 }
 
 void generate_unary_op(struct TreeNode * node){
 	printf("generate_unary_op\n");
-	if(strcmp(node->type, "NEGATION_OP") == 0) {
+	struct TreeNode * child_node = node->children[0];
+	printf("%s\n", child_node->type);
+
+	if(strcmp(child_node->type, "NEGATION_OP") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# NEGATION OP\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "neg %%eax\n");	
 	}
 
-	if(strcmp(node->type, "BITWISE_COMPLEMENT_OP") == 0) {
+	if(strcmp(child_node->type, "BITWISE_COMPLEMENT_OP") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# BITWISE COMPLEMENT OP\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "not %%eax\n");	
 	}
 
-	if(strcmp(node->type, "LOGICAL_NEGATION_OP") == 0) {
+	if(strcmp(child_node->type, "LOGICAL_NEGATION_OP") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOGICAL NEGATION OP\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");	
@@ -106,33 +148,3 @@ void generate_unary_op(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "sete %%al\n");	
 	}
 }
-
-void generate_term(struct TreeNode ** node){
-	printf("generate_term\n");
-	/*if(strcmp((*node + 1)->type, "ADDITION_OP") == 0) {
-		generate_fact(node);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
-		generate_fact(node + 2);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx %%eax\n");
-		node = node + 3;
-	}*/
-	/*if(strcmp(node->type, "ADDITION_OP") == 0) {
-			asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);	
-	}*/
-}
-
-void generate_fact(struct TreeNode * node){
-	printf("generate_fact\n");
-	struct TreeNode * child_node = node;
-
-	if(strcmp(child_node->type, "INT") == 0) {
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);	
-	}
-
-	if(strcmp(child_node->type, "UNARY_OP") == 0) {
-		generate_unary_op(child_node->children[0]);
-	}
-}
-
-
