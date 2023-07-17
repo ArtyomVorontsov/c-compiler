@@ -12,7 +12,7 @@ struct TreeNode * parse(){
 	*pns = nodes_stack[0];
 
 	match = Program();
-	if(!match) 
+	if(!match) {
 		printf(
 			"ERROR: Parsing is failed at line %d:%d. After '%s'\n", 
 			error_token->position.line, 
@@ -20,6 +20,7 @@ struct TreeNode * parse(){
 			error_token->value.string
 		), 
 		exit(1);
+	}
 
 	struct TreeNode * root_node = nodes_stack[0];
 
@@ -169,7 +170,11 @@ struct TreeNode * Factor(){
 		pt++;
 		exp_node = Expression();
 
-		if (pt->type && (cmpstr(pt->type, "CLOSE_PARENTHESIS") == false)) set_error();
+		if (pt->type && (cmpstr(pt->type, "CLOSE_PARENTHESIS") == false)) {
+			set_error();
+			printf("Missing parenthesis error.\n");
+			exit(1);
+		}
 		pt++;
 
 		set_node_as_child(node, exp_node);
@@ -192,6 +197,8 @@ struct TreeNode * Factor(){
 		set_node_as_child(node, int_node);
 	} else {
 		set_error();
+		printf("Factor error.\n");
+		exit(1);
 	}
 
 	remove_node_from_deepest();	
