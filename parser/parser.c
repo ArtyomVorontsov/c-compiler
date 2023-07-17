@@ -97,6 +97,7 @@ struct TreeNode * Expression(){
 
 	set_node_as_deepest(node);
 	term_node = Term();
+	set_node_as_child(node, term_node); 
 	op = pt;
 
 	while(
@@ -181,8 +182,9 @@ struct TreeNode * Factor(){
 		exp_node = Expression();
 
 		if(
-			pt->type && (cmpstr((pt + 1)->type, "CLOSE_PARENTHESIS") == false)
+			pt->type && (cmpstr(pt->type, "CLOSE_PARENTHESIS") == false)
 		){
+			printf("Close parenthesis error \n");
 			exit(1);
 		}
 		pt++;
@@ -191,15 +193,21 @@ struct TreeNode * Factor(){
 
 		return node;	
 	} 
-	 else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
-/*		un_op_node = create_node("UNARY_OP", "UNARY_OP");
-		op_node = Binary_OP(op);
+	 else if (
+		next->type && 
+		(
+		 cmpstr(next->type, "ADDITION_OP") ||
+		 cmpstr(next->type, "NEGATION_OP")
+		)
+	){
+		un_op_node = create_node("UNARY_OP", "UNARY_OP");
+		op_node = Binary_OP();
 		exp_node = Expression();
 
 		set_node_as_child(un_op_node, op_node);
 		set_node_as_child(un_op_node, exp_node);
 
-		set_node_as_child(node, un_op_node); */
+		set_node_as_child(node, un_op_node);
 
 		return node;
 	}
@@ -209,6 +217,7 @@ struct TreeNode * Factor(){
 			 cmpstr(next->type, "INT")
 			)
 	){
+		printf("INT %s\n", next->type);
 		int_node = create_node(next->type, next->value.string);
 		set_node_as_child(node, int_node);
 
@@ -217,14 +226,13 @@ struct TreeNode * Factor(){
 		return node;	
 	}
 
+	printf("Factor error \n");
 	exit(1);
 
 }
 
 struct TreeNode * BinOp(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
 	printf("BinOp\n");
-	//printf("term_node: %s\n", term_node->children[0]->type);
-	//printf("next_term_node: %s\n", next_term_node->children[0]->type);
 
 	set_node_as_child(op_node->children[0], term_node);
 	set_node_as_child(op_node->children[0], next_term_node);
@@ -259,12 +267,12 @@ bool Unary_OP(){
 	return false;
 }
 
-struct TreeNode * Binary_OP(struct Token * token){
+struct TreeNode * Binary_OP(){
 	printf("Binary_OP\n");
 	struct TreeNode *node = create_node("BINARY_OP", "BINARY_OP");
 	set_node_as_deepest(node);
 
-	struct TreeNode *op_node = create_node(token->type, token->value.string);
+	struct TreeNode *op_node = create_node(pt->type, pt->value.string);
 	pt++;
 	set_node_as_deepest(node);
 

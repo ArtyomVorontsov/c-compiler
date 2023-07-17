@@ -11,7 +11,7 @@ struct TreeNode * BinOp(struct TreeNode * op_node, struct TreeNode * term_node, 
 bool Type();
 bool Identifier();
 bool Unary_OP();
-struct TreeNode * Binary_OP(struct Token * token);
+struct TreeNode * Binary_OP();
 bool Match(char *type);
 void remove_node_from_deepest();
 void set_node_as_deepest(struct TreeNode * current_node);
