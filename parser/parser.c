@@ -69,13 +69,15 @@ bool Function(){
 
 bool Statement(){
 	bool match;
-
 	struct TreeNode * node = create_node("STATEMENT", "STATEMENT");
+	struct TreeNode * exp;
+
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	match = Match("RETURN_KEYWORD") && Expression() && Match("SEMICOLON");
+	match = Match("RETURN_KEYWORD") && (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON");
 
+	printf("end type %s\n", pt->type);
 	remove_node_from_deepest();	
 
 	if(match) return true;
@@ -84,137 +86,154 @@ bool Statement(){
 	return false;
 }
 
-bool Expression(){
+struct TreeNode * Expression(){
+	printf("Expression\n");
 	struct Token * next = pt;
-	struct Token * lookahead = pt + 1;
-	bool lookahead_is_bin_op = false;
-	bool success = false;
+	struct TreeNode * node = create_node("EXPRESSION", "EXPRESSION");
+	struct TreeNode * term_node;
+	struct TreeNode * next_term_node;
+	struct TreeNode * bin_op_node;
+	struct Token * op;
 
-	struct TreeNode *node = create_node("EXPRESSION", "EXPRESSION");
- 	set_as_child(node);
-	set_node_as_deepest(node);
+	printf("\tpt: %s\n", pt->type);
+	term_node = Term();
+	printf("\tPT AFTER TERM: %s\n", pt->type);
+	op = pt ;
 
-	// At least 1 Term production will be invoked
-	if((node->children_amount = 0, pt = next, Term())){
-		success = true;
-		lookahead = pt;
-		lookahead_is_bin_op = lookahead->type && 
+	int i = 0;
+
+	while(
+		op->type && 
 		(
-		 cmpstr(lookahead->type, "ADDITION_OP") ||
-		 cmpstr(lookahead->type, "NEGATION_OP") ||
-		 cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-		 cmpstr(lookahead->type, "DIVISION_OP")
-		);
+		 cmpstr(op->type, "ADDITION_OP") ||
+		 cmpstr(op->type, "NEGATION_OP") ||
+		 cmpstr(op->type, "MULTIPLICATION_OP") ||
+		 cmpstr(op->type, "DIVISION_OP")
+		)
+	){
+		printf("\top: %s %s\n", pt->type, pt->value.string);
+		bin_op_node = Binary_OP(op);
+		printf("\tpt after Binary_OP: %s %s\n", pt->type, pt->value.string);
+		printf("\tnext term node: %s \n", (op+1)->type);
+		next_term_node = Term(op + 1);
+		printf("\tpt after next Term: %s %s\n", pt->type, pt->value.string);
 
-		while(lookahead_is_bin_op){
-			next = pt;
-			
-			// Invoke binary op productions
-			if(lookahead_is_bin_op){
-				if((Match("ADDITION_OP") || Match("NEGATION_OP")) && Term()){
-					success = true;
-				} else {
-					success = false;
-				}
-			} else {
-				break;
-			}
+		printf("PRINT\n");
+		printf("term_node: %s\n", term_node->children[0]->type);
+		printf("next_term_node: %s\n", next_term_node->children[0]->type);
 
-			lookahead = pt;
-			lookahead_is_bin_op = lookahead->type && 
-			(
-			 cmpstr(lookahead->type, "ADDITION_OP") ||
-			 cmpstr(lookahead->type, "NEGATION_OP") ||
-			 cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-			 cmpstr(lookahead->type, "DIVISION_OP")
-			);
-		}
-		remove_node_from_deepest();	
-		return success;
+		term_node = BinOp(bin_op_node, term_node, next_term_node);
+		if(i == 0) 
+			set_node_as_child(node, term_node); 
 
-	} 
+		op = pt + 1;	
+		i++;
+	}
 
-	remove_node_from_deepest();	
-
-	set_error();
-
-	return false;
+	return node;
 }
 
-bool Term(){
-	struct Token * next = pt;
-	struct Token * lookahead = pt + 1;
-	bool lookahead_is_bin_op = false;
-	bool success = false;
-	struct TreeNode *node = create_node("TERM", "TERM");
+struct TreeNode * Term(){
+	printf("Term\n");
+	struct TreeNode * node = create_node("TERM", "TERM");
+	struct TreeNode * factor_node;
+	struct TreeNode * next_factor_node;
+	struct TreeNode * op_node;
+	struct Token * op;
+	int i = 0;
 
- 	set_as_child(node);
-	set_node_as_deepest(node);
+	factor_node = Factor();
+	set_node_as_child(node, factor_node);
 
-	// At least 1 Factor production will be invoked
-	if(node->children_amount = 0, pt = next, Factor()){
-		success = true;
-		lookahead = pt;
-		lookahead_is_bin_op = lookahead->type && 
-		(cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-		 cmpstr(lookahead->type, "DIVISION_OP"));
+	op = pt + 1;
 
-		// Invoke binary op productions
-		while(lookahead_is_bin_op){
-			next = pt;
-		
-			if(lookahead_is_bin_op){
-				if((Match("MULTIPLICATION_OP") || Match("DIVISION_OP")) && Factor()){
-					success = true;
-				} else {
-					success = false;
-				}
-			} else {
-				break;
-			}
 	
-			lookahead = pt;
-			lookahead_is_bin_op = lookahead->type && 
-			(cmpstr(lookahead->type, "MULTIPLICATION_OP") ||
-			 cmpstr(lookahead->type, "DIVISION_OP"));
-		}
-		remove_node_from_deepest();	
+	printf("FACTOR_NODE: %s\n", factor_node->type);
+	while(
+		op->type && 
+		(
+		 cmpstr(op->type, "MULTIPLICATION_OP") ||
+		 cmpstr(op->type, "DIVISION_OP")
+		)
+	){
+		op_node = Binary_OP(op);
+		next_factor_node = Factor(op + 1);
 
-		return success;
-	} 
+		factor_node = BinOp(op_node, factor_node, next_factor_node);
+	//	if(i == 0) set_node_as_child(node, factor_node);
+	
+		op = pt + 1;	
+	}
 
-	remove_node_from_deepest();	
 
-	set_error();
-
-	return false;
+	return node;
 }
 
-bool Factor(){
+
+struct TreeNode * Factor(){
+	printf("Factor\n");
+	printf("Factor pt: %s\n", pt->type);
+	struct TreeNode * node = create_node("FACTOR", "FACTOR");
+	struct TreeNode * int_node;
+	struct TreeNode * exp_node;
+
 	struct Token * next = pt;
-	struct TreeNode *node = create_node("FACTOR", "FACTOR");
 
- 	set_as_child(node);
-	set_node_as_deepest(node);
+	if(
+		next->type && 
+		(
+		 cmpstr(next->type, "OPEN_PARENTHESIS")
+		)
+	){
+		pt++;
+		exp_node = Expression();
 
-	if(node->children_amount = 0, pt = next, Match("OPEN_PARENTHESIS") && Expression() && Match("CLOSE_PARENTHESIS")){
-		remove_node_from_deepest();	
-		return true;
+		if(
+			pt->type && (cmpstr((pt + 1)->type, "CLOSE_PARENTHESIS") == false)
+			
+		){
+			// error
+			exit(1);
+		}
+		pt++;
+
+		set_node_as_child(node, exp_node);
+
+		return node;	
 	} 
-	else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
+	/* else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
 		remove_node_from_deepest();	
 		return true;
+	} */
+	else if (
+			next->type && 
+			(
+			 cmpstr(next->type, "INT")
+			)
+	){
+		printf("INT!!!\n");
+		int_node = create_node(next->type, next->value.string);
+		set_node_as_child(node, int_node);
+
+		pt++;
+
+		return node;	
 	}
-	else if (node->children_amount = 0, pt = next, Match("INT")){
-		remove_node_from_deepest();
-		return true;
-	}
 
-	remove_node_from_deepest();	
+	//exit(1);
+	//set_error();
 
-	set_error();
+}
 
-	return false;
+struct TreeNode * BinOp(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
+	printf("BinOp\n");
+	//printf("term_node: %s\n", term_node->children[0]->type);
+	//printf("next_term_node: %s\n", next_term_node->children[0]->type);
+
+	set_node_as_child(op_node->children[0], term_node);
+	set_node_as_child(op_node->children[0], next_term_node);
+	
+	return op_node;
 }
 
 bool Unary_OP(){
@@ -244,35 +263,15 @@ bool Unary_OP(){
 	return false;
 }
 
-bool Binary_OP(){
-	struct Token * next = pt;
+struct TreeNode * Binary_OP(struct Token * token){
+	printf("Binary_OP\n");
 	struct TreeNode *node = create_node("BINARY_OP", "BINARY_OP");
+	struct TreeNode *op_node = create_node(token->type, token->value.string);
+	pt++;
 
- 	set_as_child(node);
-	set_node_as_deepest(node);
+	set_node_as_child(node, op_node);
 
-	if(node->children_amount = 0, pt = next, Match("NEGATION_OP")){
-		remove_node_from_deepest();	
-		return true;
-	} 
-	else if (node->children_amount = 0, pt = next, Match("ADDITION_OP")){
-		remove_node_from_deepest();	
-		return true;
-	} 
-	else if (node->children_amount = 0, pt = next, Match("MULTIPLICATION_OP")){
-		remove_node_from_deepest();	
-		return true;
-	} 
-	else if (node->children_amount = 0, pt = next, Match("DIVISION_OP")){
-		remove_node_from_deepest();	
-		return true;
-	} 
-
-	remove_node_from_deepest();
-
-	set_error();
-
-	return false;
+	return node;
 }
 
 
@@ -323,6 +322,11 @@ void set_as_child(struct TreeNode * current_node){
 	// Assign as a child to previous node
 	struct TreeNode * parent_node = *(pns - 1);
 	
+	(*parent_node).children[(*parent_node).children_amount] = current_node;
+	(*parent_node).children_amount++;
+}
+
+void set_node_as_child(struct TreeNode * parent_node, struct TreeNode * current_node){
 	(*parent_node).children[(*parent_node).children_amount] = current_node;
 	(*parent_node).children_amount++;
 }
