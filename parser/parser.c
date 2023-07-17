@@ -112,7 +112,7 @@ struct TreeNode * Expression(){
 		bin_op_node = Binary_OP(op);
 		next_term_node = Term(op + 1);
 
-		term_node = BinOp(bin_op_node, term_node, next_term_node);
+		term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
 		remove_node_as_child(node);
 		set_node_as_child(node, term_node); 
 
@@ -149,7 +149,7 @@ struct TreeNode * Term(){
 		op_node = Binary_OP(op);
 		next_factor_node = Factor(op + 1);
 
-		factor_node = BinOp(op_node, factor_node, next_factor_node);
+		factor_node = Binary_Statement(op_node, factor_node, next_factor_node);
 		remove_node_as_child(node);
 		set_node_as_child(node, factor_node); 
 	
@@ -169,39 +169,30 @@ struct TreeNode * Factor(){
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
 	struct TreeNode * un_op_node;
-
 	struct Token * next = pt;
 
-	if(
-		next->type && 
-		(
-		 cmpstr(next->type, "OPEN_PARENTHESIS")
-		)
-	){
+	set_node_as_deepest(node);
+	if (next->type && (cmpstr(next->type, "OPEN_PARENTHESIS"))){
 		pt++;
 		exp_node = Expression();
 
-		if(
-			pt->type && (cmpstr(pt->type, "CLOSE_PARENTHESIS") == false)
-		){
-			printf("Close parenthesis error \n");
-			exit(1);
-		}
+		if (pt->type && (cmpstr(pt->type, "CLOSE_PARENTHESIS") == false)) set_error();
 		pt++;
 
 		set_node_as_child(node, exp_node);
 
-		return node;	
 	} 
-	 else if (
+	else if (
 		next->type && 
 		(
-		 cmpstr(next->type, "ADDITION_OP") ||
-		 cmpstr(next->type, "NEGATION_OP")
+		 cmpstr(next->type, "ADDITION_OP") || 
+		 cmpstr(next->type, "NEGATION_OP") ||
+		 cmpstr(next->type, "LOGICAL_NEGATION_OP") ||
+		 cmpstr(next->type, "BITWISE_COMPLEMENT_OP")
 		)
 	){
-		un_op_node = create_node("UNARY_OP", "UNARY_OP");
-		op_node = Binary_OP();
+		un_op_node = create_node("UNARY_STATEMENT", "UNARY_STATEMENT");
+		op_node = Unary_OP();
 		exp_node = Expression();
 
 		set_node_as_child(un_op_node, op_node);
@@ -209,62 +200,48 @@ struct TreeNode * Factor(){
 
 		set_node_as_child(node, un_op_node);
 
-		return node;
 	}
-	else if (
-			next->type && 
-			(
-			 cmpstr(next->type, "INT")
-			)
-	){
-		printf("INT %s\n", next->type);
+	else if (next->type && (cmpstr(next->type, "INT"))){
 		int_node = create_node(next->type, next->value.string);
 		set_node_as_child(node, int_node);
 
 		pt++;
 
-		return node;	
+	} else {
+		set_error();
 	}
 
-	printf("Factor error \n");
-	exit(1);
+	remove_node_from_deepest();	
 
+	return node;	
 }
 
-struct TreeNode * BinOp(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
-	printf("BinOp\n");
+struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
+	printf("Binary_Statement\n");
+	struct TreeNode * binary_statement_node = create_node("BINARY_STATEMENT", "BINARY_STATEMENT");
 
-	set_node_as_child(op_node->children[0], term_node);
-	set_node_as_child(op_node->children[0], next_term_node);
+	set_node_as_child(binary_statement_node, term_node);
+	set_node_as_child(binary_statement_node, next_term_node);
+	set_node_as_child(op_node->children[0], binary_statement_node);
 	
 	return op_node;
 }
 
-bool Unary_OP(){
-	struct Token * next = pt;
+struct TreeNode * Unary_OP(){
+	printf("Unary_OP\n");
 	struct TreeNode *node = create_node("UNARY_OP", "UNARY_OP");
-
- 	set_as_child(node);
 	set_node_as_deepest(node);
 
-	if(node->children_amount = 0, pt = next, Match("NEGATION_OP")){
-		remove_node_from_deepest();	
-		return true;
-	} 
-	else if (node->children_amount = 0, pt = next, Match("BITWISE_COMPLEMENT_OP")){
-		remove_node_from_deepest();	
-		return true;
-	} 
-	else if (node->children_amount = 0, pt = next, Match("LOGICAL_NEGATION_OP")){
-		remove_node_from_deepest();	
-		return true;
-	}
+	struct TreeNode *op_node = create_node(pt->type, pt->value.string);
+	pt++;
+	set_node_as_deepest(node);
+
+	set_node_as_child(node, op_node);
 
 	remove_node_from_deepest();
+	remove_node_from_deepest();
 
-	set_error();
-
-	return false;
+	return node;
 }
 
 struct TreeNode * Binary_OP(){
