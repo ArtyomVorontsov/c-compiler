@@ -88,7 +88,6 @@ bool Statement(){
 
 struct TreeNode * Expression(){
 	printf("Expression\n");
-	struct Token * next = pt;
 	struct TreeNode * node = create_node("EXPRESSION", "EXPRESSION");
 	struct TreeNode * term_node;
 	struct TreeNode * next_term_node;
@@ -98,25 +97,22 @@ struct TreeNode * Expression(){
 	set_node_as_deepest(node);
 	term_node = Term();
 	set_node_as_child(node, term_node); 
-	op = pt;
 
 	while(
-		op->type && 
+		pt->type && 
 		(
-		 cmpstr(op->type, "ADDITION_OP") ||
-		 cmpstr(op->type, "NEGATION_OP") ||
-		 cmpstr(op->type, "MULTIPLICATION_OP") ||
-		 cmpstr(op->type, "DIVISION_OP")
+		 cmpstr(pt->type, "ADDITION_OP") ||
+		 cmpstr(pt->type, "NEGATION_OP") ||
+		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
+		 cmpstr(pt->type, "DIVISION_OP")
 		)
 	){
-		bin_op_node = Binary_OP(op);
-		next_term_node = Term(op + 1);
+		bin_op_node = Binary_OP(pt);
+		next_term_node = Term(pt + 1);
 
 		term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
 		remove_node_as_child(node);
 		set_node_as_child(node, term_node); 
-
-		op = pt ;	
 	}
 
 	remove_node_from_deepest();	
@@ -130,30 +126,26 @@ struct TreeNode * Term(){
 	struct TreeNode * factor_node;
 	struct TreeNode * next_factor_node;
 	struct TreeNode * op_node;
-	struct Token * op;
 
 	set_node_as_deepest(node);
 
 	factor_node = Factor();
 	set_node_as_child(node, factor_node);
 
-	op = pt + 1;
 
 	while(
-		op->type && 
+		pt->type && 
 		(
-		 cmpstr(op->type, "MULTIPLICATION_OP") ||
-		 cmpstr(op->type, "DIVISION_OP")
+		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
+		 cmpstr(pt->type, "DIVISION_OP")
 		)
 	){
-		op_node = Binary_OP(op);
-		next_factor_node = Factor(op + 1);
+		op_node = Binary_OP(pt);
+		next_factor_node = Factor(pt + 1);
 
 		factor_node = Binary_Statement(op_node, factor_node, next_factor_node);
 		remove_node_as_child(node);
 		set_node_as_child(node, factor_node); 
-	
-		op = pt;
 	}
 
 	remove_node_from_deepest();	
@@ -169,10 +161,9 @@ struct TreeNode * Factor(){
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
 	struct TreeNode * un_op_node;
-	struct Token * next = pt;
 
 	set_node_as_deepest(node);
-	if (next->type && (cmpstr(next->type, "OPEN_PARENTHESIS"))){
+	if (pt->type && (cmpstr(pt->type, "OPEN_PARENTHESIS"))){
 		pt++;
 		exp_node = Expression();
 
@@ -183,30 +174,20 @@ struct TreeNode * Factor(){
 
 	} 
 	else if (
-		next->type && 
+		pt->type && 
 		(
-		 cmpstr(next->type, "ADDITION_OP") || 
-		 cmpstr(next->type, "NEGATION_OP") ||
-		 cmpstr(next->type, "LOGICAL_NEGATION_OP") ||
-		 cmpstr(next->type, "BITWISE_COMPLEMENT_OP")
+		 cmpstr(pt->type, "ADDITION_OP") || 
+		 cmpstr(pt->type, "NEGATION_OP") ||
+		 cmpstr(pt->type, "LOGICAL_NEGATION_OP") ||
+		 cmpstr(pt->type, "BITWISE_COMPLEMENT_OP")
 		)
 	){
-		un_op_node = create_node("UNARY_STATEMENT", "UNARY_STATEMENT");
-		op_node = Unary_OP();
-		exp_node = Expression();
-
-		set_node_as_child(un_op_node, op_node);
-		set_node_as_child(un_op_node, exp_node);
-
+		un_op_node = Unary_Statement();
 		set_node_as_child(node, un_op_node);
-
 	}
-	else if (next->type && (cmpstr(next->type, "INT"))){
-		int_node = create_node(next->type, next->value.string);
+	else if (pt->type && (cmpstr(pt->type, "INT"))){
+		int_node = Int();
 		set_node_as_child(node, int_node);
-
-		pt++;
-
 	} else {
 		set_error();
 	}
@@ -225,6 +206,32 @@ struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * 
 	set_node_as_child(op_node->children[0], binary_statement_node);
 	
 	return op_node;
+}
+
+struct TreeNode * Unary_Statement(){
+	printf("Unary_Statement\n");
+	struct TreeNode * fact_node;
+	struct TreeNode * op_node;
+	struct TreeNode * un_op_node;
+
+	un_op_node = create_node("UNARY_STATEMENT", "UNARY_STATEMENT");
+	op_node = Unary_OP();
+	fact_node = Factor();
+
+	set_node_as_child(un_op_node, op_node);
+	set_node_as_child(un_op_node, fact_node);
+	
+	return un_op_node;
+}
+
+struct TreeNode * Int(){
+	printf("Int\n");
+	struct TreeNode * int_node;
+
+	int_node = create_node(pt->type, pt->value.string);
+	pt++;
+	
+	return int_node;
 }
 
 struct TreeNode * Unary_OP(){
