@@ -28,6 +28,7 @@ struct TreeNode * parse(){
 
 
 bool Program(){
+	print_if_explicit("Program\n");
 	struct TreeNode *node = create_node("PROGRAM", "PROGRAM");
 	bool match;
 	struct TreeNode * root_node = nodes_stack[0];
@@ -45,6 +46,7 @@ bool Program(){
 }
 
 bool Function(){
+	print_if_explicit("Function\n");
 	struct TreeNode *node = create_node("FUNCTION", "FUCTION");
 	bool match;
 
@@ -68,6 +70,7 @@ bool Function(){
 }
 
 bool Statement(){
+	print_if_explicit("Statement\n");
 	bool match;
 	struct TreeNode * node = create_node("STATEMENT", "STATEMENT");
 	struct TreeNode * exp;
@@ -77,7 +80,6 @@ bool Statement(){
 
 	match = Match("RETURN_KEYWORD") && (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON");
 
-	printf("end type %s\n", pt->type);
 	remove_node_from_deepest();	
 
 	if(match) return true;
@@ -87,12 +89,11 @@ bool Statement(){
 }
 
 struct TreeNode * Expression(){
-	printf("Expression\n");
+	print_if_explicit("Expression\n");
 	struct TreeNode * node = create_node("EXPRESSION", "EXPRESSION");
 	struct TreeNode * term_node;
 	struct TreeNode * next_term_node;
 	struct TreeNode * bin_op_node;
-	struct Token * op;
 
 	set_node_as_deepest(node);
 	term_node = Term();
@@ -121,7 +122,7 @@ struct TreeNode * Expression(){
 }
 
 struct TreeNode * Term(){
-	printf("Term\n");
+	print_if_explicit("Term\n");
 	struct TreeNode * node = create_node("TERM", "TERM");
 	struct TreeNode * factor_node;
 	struct TreeNode * next_factor_node;
@@ -155,7 +156,7 @@ struct TreeNode * Term(){
 
 
 struct TreeNode * Factor(){
-	printf("Factor\n");
+	print_if_explicit("Factor\n");
 	struct TreeNode * node = create_node("FACTOR", "FACTOR");
 	struct TreeNode * int_node;
 	struct TreeNode * exp_node;
@@ -164,6 +165,7 @@ struct TreeNode * Factor(){
 
 	set_node_as_deepest(node);
 	if (pt->type && (cmpstr(pt->type, "OPEN_PARENTHESIS"))){
+		print_if_explicit("Expression in parenthesis\n");
 		pt++;
 		exp_node = Expression();
 
@@ -198,7 +200,7 @@ struct TreeNode * Factor(){
 }
 
 struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
-	printf("Binary_Statement\n");
+	print_if_explicit("Binary_Statement\n");
 	struct TreeNode * binary_statement_node = create_node("BINARY_STATEMENT", "BINARY_STATEMENT");
 
 	set_node_as_child(binary_statement_node, term_node);
@@ -209,7 +211,7 @@ struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * 
 }
 
 struct TreeNode * Unary_Statement(){
-	printf("Unary_Statement\n");
+	print_if_explicit("Unary_Statement\n");
 	struct TreeNode * fact_node;
 	struct TreeNode * op_node;
 	struct TreeNode * un_op_node;
@@ -225,7 +227,7 @@ struct TreeNode * Unary_Statement(){
 }
 
 struct TreeNode * Int(){
-	printf("Int\n");
+	print_if_explicit("Int\n");
 	struct TreeNode * int_node;
 
 	int_node = create_node(pt->type, pt->value.string);
@@ -235,7 +237,7 @@ struct TreeNode * Int(){
 }
 
 struct TreeNode * Unary_OP(){
-	printf("Unary_OP\n");
+	print_if_explicit("Unary_OP\n");
 	struct TreeNode *node = create_node("UNARY_OP", "UNARY_OP");
 	set_node_as_deepest(node);
 
@@ -252,7 +254,7 @@ struct TreeNode * Unary_OP(){
 }
 
 struct TreeNode * Binary_OP(){
-	printf("Binary_OP\n");
+	print_if_explicit("Binary_OP\n");
 	struct TreeNode *node = create_node("BINARY_OP", "BINARY_OP");
 	set_node_as_deepest(node);
 
@@ -270,6 +272,7 @@ struct TreeNode * Binary_OP(){
 
 
 bool Type(){
+	print_if_explicit("Type\n");
 	bool match;
 
 	struct TreeNode *node = create_node("TYPE", "TYPE");
@@ -288,6 +291,7 @@ bool Type(){
 
 
 bool Identifier(){
+	print_if_explicit("Identifier\n");
 	bool match;
 
 	match = Match("IDENTIFIER");
@@ -299,7 +303,10 @@ bool Identifier(){
 }
 
 bool Match(char *type){
+	print_if_explicit("Match\n");
 	if(pt->type && cmpstr(pt->type, type)){
+		if(SILENT_ARG == false)
+			printf("\tMatch: SOURCE_CODE_POINTER: '%s'\n\tPARSER_NODE: '%s'\n", pt->type, type);
 		struct TreeNode * node = create_node(pt->type, pt->value.string);
  		set_as_child(node);
 		pt++;

@@ -105,6 +105,10 @@ void print_children(struct TreeNode * children[], int children_amount, int depth
 	return;
 }
 
+void print_if_explicit(char * s){
+	if(SILENT_ARG != true) printf("%s", s);
+};
+
 char * read_file(char * file_name, char * buff){
 	char *p = buff;
 	FILE *ptr;
