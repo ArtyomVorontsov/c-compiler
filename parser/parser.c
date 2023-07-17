@@ -95,12 +95,9 @@ struct TreeNode * Expression(){
 	struct TreeNode * bin_op_node;
 	struct Token * op;
 
-	printf("\tpt: %s\n", pt->type);
+	set_node_as_deepest(node);
 	term_node = Term();
-	printf("\tPT AFTER TERM: %s\n", pt->type);
-	op = pt ;
-
-	int i = 0;
+	op = pt;
 
 	while(
 		op->type && 
@@ -111,25 +108,18 @@ struct TreeNode * Expression(){
 		 cmpstr(op->type, "DIVISION_OP")
 		)
 	){
-		printf("\top: %s %s\n", pt->type, pt->value.string);
 		bin_op_node = Binary_OP(op);
-		printf("\tpt after Binary_OP: %s %s\n", pt->type, pt->value.string);
-		printf("\tnext term node: %s \n", (op+1)->type);
 		next_term_node = Term(op + 1);
-		printf("\tpt after next Term: %s %s\n", pt->type, pt->value.string);
-
-		printf("PRINT\n");
-		printf("term_node: %s\n", term_node->children[0]->type);
-		printf("next_term_node: %s\n", next_term_node->children[0]->type);
 
 		term_node = BinOp(bin_op_node, term_node, next_term_node);
-		if(i == 0) 
-			set_node_as_child(node, term_node); 
+		remove_node_as_child(node);
+		set_node_as_child(node, term_node); 
 
-		op = pt + 1;	
-		i++;
+		op = pt ;	
 	}
 
+	remove_node_from_deepest();	
+	
 	return node;
 }
 
@@ -140,15 +130,14 @@ struct TreeNode * Term(){
 	struct TreeNode * next_factor_node;
 	struct TreeNode * op_node;
 	struct Token * op;
-	int i = 0;
+
+	set_node_as_deepest(node);
 
 	factor_node = Factor();
 	set_node_as_child(node, factor_node);
 
 	op = pt + 1;
 
-	
-	printf("FACTOR_NODE: %s\n", factor_node->type);
 	while(
 		op->type && 
 		(
@@ -160,11 +149,13 @@ struct TreeNode * Term(){
 		next_factor_node = Factor(op + 1);
 
 		factor_node = BinOp(op_node, factor_node, next_factor_node);
-	//	if(i == 0) set_node_as_child(node, factor_node);
+		remove_node_as_child(node);
+		set_node_as_child(node, factor_node); 
 	
-		op = pt + 1;	
+		op = pt;
 	}
 
+	remove_node_from_deepest();	
 
 	return node;
 }
@@ -172,10 +163,11 @@ struct TreeNode * Term(){
 
 struct TreeNode * Factor(){
 	printf("Factor\n");
-	printf("Factor pt: %s\n", pt->type);
 	struct TreeNode * node = create_node("FACTOR", "FACTOR");
 	struct TreeNode * int_node;
 	struct TreeNode * exp_node;
+	struct TreeNode * op_node;
+	struct TreeNode * un_op_node;
 
 	struct Token * next = pt;
 
@@ -190,9 +182,7 @@ struct TreeNode * Factor(){
 
 		if(
 			pt->type && (cmpstr((pt + 1)->type, "CLOSE_PARENTHESIS") == false)
-			
 		){
-			// error
 			exit(1);
 		}
 		pt++;
@@ -201,17 +191,24 @@ struct TreeNode * Factor(){
 
 		return node;	
 	} 
-	/* else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
-		remove_node_from_deepest();	
-		return true;
-	} */
+	 else if (node->children_amount = 0, pt = next, Unary_OP() && Factor()){
+/*		un_op_node = create_node("UNARY_OP", "UNARY_OP");
+		op_node = Binary_OP(op);
+		exp_node = Expression();
+
+		set_node_as_child(un_op_node, op_node);
+		set_node_as_child(un_op_node, exp_node);
+
+		set_node_as_child(node, un_op_node); */
+
+		return node;
+	}
 	else if (
 			next->type && 
 			(
 			 cmpstr(next->type, "INT")
 			)
 	){
-		printf("INT!!!\n");
 		int_node = create_node(next->type, next->value.string);
 		set_node_as_child(node, int_node);
 
@@ -220,8 +217,7 @@ struct TreeNode * Factor(){
 		return node;	
 	}
 
-	//exit(1);
-	//set_error();
+	exit(1);
 
 }
 
@@ -266,10 +262,16 @@ bool Unary_OP(){
 struct TreeNode * Binary_OP(struct Token * token){
 	printf("Binary_OP\n");
 	struct TreeNode *node = create_node("BINARY_OP", "BINARY_OP");
+	set_node_as_deepest(node);
+
 	struct TreeNode *op_node = create_node(token->type, token->value.string);
 	pt++;
+	set_node_as_deepest(node);
 
 	set_node_as_child(node, op_node);
+
+	remove_node_from_deepest();
+	remove_node_from_deepest();
 
 	return node;
 }
@@ -335,6 +337,11 @@ void remove_as_child(){
 	struct TreeNode * parent_node = *(pns - 1);
 	// Remove as a child from previous node
 	(*parent_node).children_amount--;
+}
+
+void remove_node_as_child(struct TreeNode * parent_node){
+	if((*parent_node).children_amount > 0)
+		(*parent_node).children_amount--;
 }
 
 void set_node_as_deepest(struct TreeNode * current_node){

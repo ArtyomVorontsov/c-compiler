@@ -18,5 +18,6 @@ void set_node_as_deepest(struct TreeNode * current_node);
 void set_as_child(struct TreeNode * current_node);
 void set_node_as_child(struct TreeNode * parent_node, struct TreeNode * current_node);
 void remove_as_child();
+void remove_node_as_child(struct TreeNode * parent_node);
 void set_error();
 
