@@ -25,6 +25,7 @@ int main(int argc, char **argv){
 		} 
 		if (cmpstr(argv[2], "-e")){
 			SILENT_ARG = false;
+			PRINT_PARSE_TREE_EXPLICIT_ARG = true;
 		} 
 	}
 

@@ -36,7 +36,7 @@ void generate_statement(struct TreeNode * node){
 		child_node = node->children[i];
 	
 		if(strcmp(child_node->type, "EXPRESSION") == 0) {
-			generate_expression(&child_node);
+			generate_expression(child_node);
 		} 
 		else if(strcmp(child_node->type, "RETURN_KEYWORD") == 0) {
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "ret\n");	
@@ -48,40 +48,61 @@ void generate_statement(struct TreeNode * node){
 	}
 }
 
-void generate_expression(struct TreeNode ** node){
+void generate_expression(struct TreeNode * node){
 	printf("generate_expression\n");
-	//printf("generate_expression %s\n", (**node).type);
+
 	struct TreeNode * child_node;
 
-	for(int i = 0; i < (*node)->children_amount - 1; i++){
-		child_node = (*node)->children[i];
+	printf("AAA: %d\n", node->children_amount);
 
+	for(int i = 0; i < node->children_amount; i++){
+		child_node = node->children[i];
+
+		printf("AAA: %s\n", child_node->type);
 
 		if(strcmp(child_node->type, "EXPRESSION") == 0) {
-			generate_expression(&child_node);
+			generate_expression(child_node);
 		}
 
-		printf("%d\n", i);
-		printf("generate_expression %s\n", (*node)->children[i + 1]->type);
-		if(strcmp(child_node->type, "TERM") == 0) {
-
-			if(strcmp((*node)->children[i + 1]->type, "ADDITION_OP") == 0) {
-				printf("ADDITION %s\n", child_node->type);
-				generate_fact((*node)->children[i]);
-				asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
-				generate_fact((*node)->children[i + 2]);
-				asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
-				asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx %%eax\n");
-				node = node + 3;
-				printf("DONE\n");
-			}
-//			generate_term(&child_node);
+		if(strcmp(child_node->type, "BINARY_OP") == 0) {
+			generate_binary_op(child_node);
 		}
 		else {
 			if(SILENT_ARG != true)
 				printf("No handler\n");
 		}
 	}
+}
+
+void generate_binary_op(struct TreeNode * node){
+	print_if_explicit("generate_binary_op\n");
+	struct TreeNode * child_node = node->children[0];
+	
+	generate_binary_statement(child_node->children[0], child_node->type );
+}
+
+void generate_binary_statement( struct TreeNode * node, char * operator_type ){
+	struct TreeNode * operand1 = node->children[0];
+	struct TreeNode * operand2 = node->children[1];
+
+	print_if_explicit("generate_binary_statement\n");
+	if(strcmp(operator_type, "ADDITION_OP") == 0){
+		generate_addition_statement(operand1, operand2);
+	}
+	else if (strcmp(operator_type, "NEGATION_OP") == 0){
+		// TODO
+	}
+	
+}
+
+void generate_addition_statement(struct TreeNode * operand1, struct TreeNode * operand2){
+	generate_term(operand1);
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
+
+	generate_term(operand2);
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx, %%eax\n");
 }
 
 void generate_unary_op(struct TreeNode * node){
@@ -107,31 +128,33 @@ void generate_unary_op(struct TreeNode * node){
 	}
 }
 
-void generate_term(struct TreeNode ** node){
+void generate_term(struct TreeNode * node){
 	printf("generate_term\n");
-	/*if(strcmp((*node + 1)->type, "ADDITION_OP") == 0) {
-		generate_fact(node);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
-		generate_fact(node + 2);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx %%eax\n");
-		node = node + 3;
-	}*/
-	/*if(strcmp(node->type, "ADDITION_OP") == 0) {
-			asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);	
-	}*/
+	struct TreeNode * child_node = node->children[0];
+
+	// TODO: generate multiplication code
+
+	// TODO: generate division code
+	if(strcmp(child_node->type, "FACTOR") == 0){
+		generate_fact(child_node);
+	}
 }
 
 void generate_fact(struct TreeNode * node){
 	printf("generate_fact\n");
-	struct TreeNode * child_node = node;
+	struct TreeNode * child_node = node->children[0];
 
+	printf("FACTOR: %s\n", child_node->type);
 	if(strcmp(child_node->type, "INT") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);	
 	}
 
 	if(strcmp(child_node->type, "UNARY_OP") == 0) {
 		generate_unary_op(child_node->children[0]);
+	}
+
+	if(strcmp(child_node->type, "EXPRESSION") == 0) {
+		// TODO
 	}
 }
 
