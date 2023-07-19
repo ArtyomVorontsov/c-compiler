@@ -7,7 +7,7 @@ void generate(struct TreeNode * root_node){
 }
 
 void generate_program(struct TreeNode * node){
-	printf("generate_program\n");
+	print_if_explicit("generate_program\n");
 	
 	if(strcmp(node->type, "FUNCTION") == 0){
 			generate_function(node);
@@ -19,7 +19,7 @@ void generate_program(struct TreeNode * node){
 }
 
 void generate_function(struct TreeNode * node){
-	printf("generate_function\n");
+	print_if_explicit("generate_function\n");
 	char *identifier_value = node->children[1]->value;
 	struct TreeNode * statement_node = node->children[5];
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);
@@ -29,7 +29,7 @@ void generate_function(struct TreeNode * node){
 }
 
 void generate_statement(struct TreeNode * node){
-	printf("generate_statement\n");
+	print_if_explicit("generate_statement\n");
 	struct TreeNode * child_node;
 
 	for(int i = node->children_amount - 1; i >= 0; i--){
@@ -49,16 +49,11 @@ void generate_statement(struct TreeNode * node){
 }
 
 void generate_expression(struct TreeNode * node){
-	printf("generate_expression\n");
-
+	print_if_explicit("generate_expression\n");
 	struct TreeNode * child_node;
-
-	printf("AAA: %d\n", node->children_amount);
 
 	for(int i = 0; i < node->children_amount; i++){
 		child_node = node->children[i];
-
-		printf("AAA: %s\n", child_node->type);
 
 		if(strcmp(child_node->type, "EXPRESSION") == 0) {
 			generate_expression(child_node);
@@ -90,19 +85,64 @@ void generate_binary_statement( struct TreeNode * node, char * operator_type ){
 		generate_addition_statement(operand1, operand2);
 	}
 	else if (strcmp(operator_type, "NEGATION_OP") == 0){
-		// TODO
+		generate_substraction_statement(operand1, operand2);
 	}
 	
 }
 
 void generate_addition_statement(struct TreeNode * operand1, struct TreeNode * operand2){
-	generate_term(operand1);
+	if(strcmp(operand1->type, "TERM") == 0){
+		generate_term(operand1);
+	}
+	else if(strcmp(operand1->type, "BINARY_OP") == 0){
+		generate_binary_op(operand1);
+	}
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PUSH ON THE STACK\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
 
-	generate_term(operand2);
+	if(strcmp(operand2->type, "TERM") == 0){
+		generate_term(operand2);
+	}
+	else if(strcmp(operand2->type, "BINARY_OP") == 0){
+		generate_binary_op(operand2);
+	} 
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# POP FROM THE STACK\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
 
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# ADDITION STATEMENT\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx, %%eax\n");
+}
+
+void generate_substraction_statement(struct TreeNode * operand1, struct TreeNode * operand2){
+	if(strcmp(operand1->type, "TERM") == 0){
+		generate_term(operand1);
+	}
+	else if(strcmp(operand1->type, "BINARY_OP") == 0){
+		generate_binary_op(operand1);
+	}
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PUSH ON THE STACK\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
+
+	if(strcmp(operand2->type, "TERM") == 0){
+		generate_term(operand2);
+	}
+	else if(strcmp(operand2->type, "BINARY_OP") == 0){
+		generate_binary_op(operand2);
+	} 
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# POP FROM THE STACK\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "xchg %%eax, %%ecx\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# SUBSTRACTION STATEMENT\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "subl %%eax, %%ecx\n");
 }
 
 void generate_unary_op(struct TreeNode * node){
@@ -129,7 +169,7 @@ void generate_unary_op(struct TreeNode * node){
 }
 
 void generate_term(struct TreeNode * node){
-	printf("generate_term\n");
+	print_if_explicit("generate_term\n");
 	struct TreeNode * child_node = node->children[0];
 
 	// TODO: generate multiplication code
@@ -138,14 +178,18 @@ void generate_term(struct TreeNode * node){
 	if(strcmp(child_node->type, "FACTOR") == 0){
 		generate_fact(child_node);
 	}
+	if(strcmp(child_node->type, "BINARY_OP") == 0){
+		generate_binary_op(child_node);
+	}
 }
 
 void generate_fact(struct TreeNode * node){
-	printf("generate_fact\n");
+	print_if_explicit("generate_fact\n");
 	struct TreeNode * child_node = node->children[0];
 
-	printf("FACTOR: %s\n", child_node->type);
 	if(strcmp(child_node->type, "INT") == 0) {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# SET INT\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);	
 	}
 
