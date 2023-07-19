@@ -58,9 +58,11 @@ void generate_expression(struct TreeNode * node){
 		if(strcmp(child_node->type, "EXPRESSION") == 0) {
 			generate_expression(child_node);
 		}
-
 		if(strcmp(child_node->type, "BINARY_OP") == 0) {
 			generate_binary_op(child_node);
+		}
+		if(strcmp(child_node->type, "TERM") == 0) {
+			generate_term(child_node);
 		}
 		else {
 			if(SILENT_ARG != true)
@@ -86,6 +88,9 @@ void generate_binary_statement( struct TreeNode * node, char * operator_type ){
 	}
 	else if (strcmp(operator_type, "NEGATION_OP") == 0){
 		generate_substraction_statement(operand1, operand2);
+	}
+	else if (strcmp(operator_type, "MULTIPLICATION_OP") == 0){
+		generate_multiplication_statement(operand1, operand2);
 	}
 	
 }
@@ -140,9 +145,40 @@ void generate_substraction_statement(struct TreeNode * operand1, struct TreeNode
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-	asm_buffer_ptr += sprintf(asm_buffer_ptr, "xchg %%eax, %%ecx\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "xchg %%ecx, %%eax\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# SUBSTRACTION STATEMENT\n");	
-	asm_buffer_ptr += sprintf(asm_buffer_ptr, "subl %%eax, %%ecx\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "neg %%ecx\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%ecx, %%eax\n");
+}
+
+void generate_multiplication_statement(struct TreeNode * operand1, struct TreeNode * operand2){
+	print_if_explicit("generate_multiplication_statement\n");
+	if(strcmp(operand1->type, "TERM") == 0){
+		generate_term(operand1);
+	}
+	else if(strcmp(operand1->type, "BINARY_OP") == 0){
+		generate_binary_op(operand1);
+	}
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PUSH ON THE STACK\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
+
+	if(strcmp(operand2->type, "TERM") == 0){
+		generate_term(operand2);
+	}
+	else if(strcmp(operand2->type, "BINARY_OP") == 0){
+		generate_binary_op(operand2);
+	} 
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# POP FROM THE STACK\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "pop %%ecx\n");
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# MULTIPLICATION STATEMENT\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "imul %%eax, %%ecx\n");
+	//asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%bx, %%eax\n");
+	
 }
 
 void generate_unary_op(struct TreeNode * node){
