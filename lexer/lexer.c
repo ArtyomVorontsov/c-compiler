@@ -318,44 +318,12 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
-		/* LESS_THAN */
-		tmp = token_end;
-		token_start = token_end;
-		token_end = machine_LESS_THAN_OP_FA(token_start);
-		if(token_end != (void *) FA_FAILED) { 
-			tokens[i].type = "LESS_THAN_OP";
-			curr_line_char = token_start - new_line_ptr;
-			tokens[i].position.line = curr_line;
-			tokens[i].position.line_char += curr_line_char;
-			i++;
-			token_end++;
-			continue;
-		} else {
-			token_end = tmp;
-		}
-
 		/* LESS_THAN_OR_EQUAL */
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_LESS_THAN_OR_EQUAL_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "LESS_THAN_OR_EQUAL_OP";
-			curr_line_char = token_start - new_line_ptr;
-			tokens[i].position.line = curr_line;
-			tokens[i].position.line_char += curr_line_char;
-			i++;
-			token_end++;
-			continue;
-		} else {
-			token_end = tmp;
-		}
-
-		/* GREATER_THAN */
-		tmp = token_end;
-		token_start = token_end;
-		token_end = machine_GREATER_THAN_OP_FA(token_start);
-		if(token_end != (void *) FA_FAILED) { 
-			tokens[i].type = "GREATER_THAN_OP";
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -382,6 +350,37 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* LESS_THAN */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_LESS_THAN_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "LESS_THAN_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* GREATER_THAN */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_GREATER_THAN_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "GREATER_THAN_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
 
 		/* IDENTIFIER */
 		tmp = token_end;
