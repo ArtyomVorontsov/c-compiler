@@ -254,6 +254,135 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* AND */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_AND_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "AND_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* OR */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_OR_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "OR_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* EQUAL */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_EQUAL_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "EQUAL_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* NOT_EQUAL */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_NOT_EQUAL_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "NOT_EQUAL_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* LESS_THAN */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_LESS_THAN_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "LESS_THAN_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* LESS_THAN_OR_EQUAL */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_LESS_THAN_OR_EQUAL_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "LESS_THAN_OR_EQUAL_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* GREATER_THAN */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_GREATER_THAN_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "GREATER_THAN_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* GREATER_THAN_OR_EQUAL */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_GREATER_THAN_OR_EQUAL_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "GREATER_THAN_OR_EQUAL_OP";
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
@@ -652,6 +781,142 @@ char * machine_MULTIPLICATION_OP_FA(char *p) {
 char * machine_DIVISION_OP_FA(char *p) {
 	switch (*p){
 		case '/': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* AND OP FA */
+char * machine_AND_OP_FA(char *p) {
+	switch (*p){
+		case '&': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+
+char * machine_step2_AND_OP_FA(char *p) {
+	switch (*p){
+		case '&': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+
+/* OR OP FA */
+char * machine_OR_OP_FA(char *p) {
+	switch (*p){
+		case '|': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_OR_OP_FA(char *p) {
+	switch (*p){
+		case '|': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}
+}
+
+/* EQUAL OP FA */
+char * machine_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '=': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '=': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* NOT_EQUAL OP FA */
+char * machine_NOT_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '!': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_NOT_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '=': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* LESS_THAN OP FA */
+char * machine_LESS_THAN_OP_FA(char *p) {
+	switch (*p){
+		case '<': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* LESS_THAN_OR_EQUAL OP FA */
+char * machine_LESS_THAN_OR_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '<': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_LESS_THAN_OR_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '=': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* GREATER_THAN OP FA */
+char * machine_GREATER_THAN_OP_FA(char *p) {
+	switch (*p){
+		case '>': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* GREATER_THAN_OR_EQUAL OP FA */
+char * machine_GREATER_THAN_OR_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '>': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_GREATER_THAN_OR_EQUAL_OP_FA(char *p) {
+	switch (*p){
+		case '=': 
 			return p;
 		default:
 			return (void *) FA_FAILED;

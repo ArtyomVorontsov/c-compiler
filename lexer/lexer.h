@@ -36,6 +36,20 @@ char * machine_MULTIPLICATION_OP_FA(char *p);
 char * machine_DIVISION_OP_FA(char *p);
 char * machine_BITWISE_COMPLEMENT_OP_FA(char *p);
 char * machine_LOGICAL_NEGATION_OP_FA(char *p);
+char * machine_AND_OP_FA(char *p);
+char * machine_step2_AND_OP_FA(char *p);
+char * machine_OR_OP_FA(char *p);
+char * machine_step2_OR_OP_FA(char *p);
+char * machine_EQUAL_OP_FA(char *p);
+char * machine_step2_EQUAL_OP_FA(char *p);
+char * machine_NOT_EQUAL_OP_FA(char *p);
+char * machine_step2_NOT_EQUAL_OP_FA(char *p);
+char * machine_LESS_THAN_OP_FA(char *p);
+char * machine_LESS_THAN_OR_EQUAL_OP_FA(char *p);
+char * machine_step2_LESS_THAN_OR_EQUAL_OP_FA(char *p);
+char * machine_GREATER_THAN_OP_FA(char *p);
+char * machine_GREATER_THAN_OR_EQUAL_OP_FA(char *p);
+char * machine_step2_GREATER_THAN_OR_EQUAL_OP_FA(char *p);
 
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
