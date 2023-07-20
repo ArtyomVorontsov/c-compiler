@@ -1,2 +1,7 @@
 #!/bin/sh
-rm ./compiler.out ; make ; ./compiler.out ./return_2.c -e; gcc -m32 ./return_2.s ; ./a.out ; echo $?
+
+COMPILER_NAME="$1"
+FILE_NAME="$2"
+CMD="rm ${COMPILER_NAME%.c}.out ; make ; ${COMPILER_NAME%.c}.out ${FILE_NAME} -e; gcc -m32 ${FILE_NAME%.c}.s ; cat ${FILE_NAME}; echo ; ./a.out ; echo \$?"
+echo ${CMD}
+eval ${CMD}
