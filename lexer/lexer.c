@@ -244,6 +244,7 @@ struct Token * lex(char *inp){
 		token_end = machine_LOGICAL_NEGATION_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "LOGICAL_NEGATION_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -260,6 +261,7 @@ struct Token * lex(char *inp){
 		token_end = machine_AND_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "AND_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -276,6 +278,7 @@ struct Token * lex(char *inp){
 		token_end = machine_OR_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "OR_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -292,6 +295,7 @@ struct Token * lex(char *inp){
 		token_end = machine_EQUAL_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "EQUAL_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -308,6 +312,7 @@ struct Token * lex(char *inp){
 		token_end = machine_NOT_EQUAL_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "NOT_EQUAL_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -324,6 +329,7 @@ struct Token * lex(char *inp){
 		token_end = machine_LESS_THAN_OR_EQUAL_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "LESS_THAN_OR_EQUAL_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -340,6 +346,7 @@ struct Token * lex(char *inp){
 		token_end = machine_GREATER_THAN_OR_EQUAL_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "GREATER_THAN_OR_EQUAL_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -354,8 +361,10 @@ struct Token * lex(char *inp){
 		tmp = token_end;
 		token_start = token_end;
 		token_end = machine_LESS_THAN_OP_FA(token_start);
+
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "LESS_THAN_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -372,6 +381,7 @@ struct Token * lex(char *inp){
 		token_end = machine_GREATER_THAN_OP_FA(token_start);
 		if(token_end != (void *) FA_FAILED) { 
 			tokens[i].type = "GREATER_THAN_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
 			curr_line_char = token_start - new_line_ptr;
 			tokens[i].position.line = curr_line;
 			tokens[i].position.line_char += curr_line_char;
@@ -592,6 +602,11 @@ char * machine_step2_INT_FA(char *p){
 		case '/':
 		case '*':
 		case ')':
+		case '<':
+		case '>':
+		case '=':
+		case '&':
+		case '|':
 		case '\n':
 		case '\t':
 			return p - 1;
@@ -790,7 +805,7 @@ char * machine_DIVISION_OP_FA(char *p) {
 char * machine_AND_OP_FA(char *p) {
 	switch (*p){
 		case '&': 
-			return p;
+			return machine_step2_AND_OP_FA(p + 1);
 		default:
 			return (void *) FA_FAILED;
 	}	
@@ -811,7 +826,7 @@ char * machine_step2_AND_OP_FA(char *p) {
 char * machine_OR_OP_FA(char *p) {
 	switch (*p){
 		case '|': 
-			return p;
+			return machine_step2_OR_OP_FA(p + 1);
 		default:
 			return (void *) FA_FAILED;
 	}	
@@ -830,7 +845,7 @@ char * machine_step2_OR_OP_FA(char *p) {
 char * machine_EQUAL_OP_FA(char *p) {
 	switch (*p){
 		case '=': 
-			return p;
+			return machine_step2_EQUAL_OP_FA(p + 1);
 		default:
 			return (void *) FA_FAILED;
 	}	
@@ -849,7 +864,7 @@ char * machine_step2_EQUAL_OP_FA(char *p) {
 char * machine_NOT_EQUAL_OP_FA(char *p) {
 	switch (*p){
 		case '!': 
-			return p;
+			return machine_step2_NOT_EQUAL_OP_FA(p + 1);
 		default:
 			return (void *) FA_FAILED;
 	}	
@@ -878,7 +893,7 @@ char * machine_LESS_THAN_OP_FA(char *p) {
 char * machine_LESS_THAN_OR_EQUAL_OP_FA(char *p) {
 	switch (*p){
 		case '<': 
-			return p;
+			return machine_step2_LESS_THAN_OR_EQUAL_OP_FA(p + 1);
 		default:
 			return (void *) FA_FAILED;
 	}	
@@ -907,7 +922,7 @@ char * machine_GREATER_THAN_OP_FA(char *p) {
 char * machine_GREATER_THAN_OR_EQUAL_OP_FA(char *p) {
 	switch (*p){
 		case '>': 
-			return p;
+			return machine_step2_GREATER_THAN_OR_EQUAL_OP_FA(p + 1);
 		default:
 			return (void *) FA_FAILED;
 	}	
