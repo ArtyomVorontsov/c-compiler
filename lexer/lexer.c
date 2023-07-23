@@ -238,23 +238,6 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
-		/* LOGICAL NEGATION */
-		tmp = token_end;
-		token_start = token_end;
-		token_end = machine_LOGICAL_NEGATION_OP_FA(token_start);
-		if(token_end != (void *) FA_FAILED) { 
-			tokens[i].type = "LOGICAL_NEGATION_OP";
-			cpy_str(token_start, token_end, tokens[i].value.string, 100);
-			curr_line_char = token_start - new_line_ptr;
-			tokens[i].position.line = curr_line;
-			tokens[i].position.line_char += curr_line_char;
-			i++;
-			token_end++;
-			continue;
-		} else {
-			token_end = tmp;
-		}
-
 		/* AND */
 		tmp = token_end;
 		token_start = token_end;
@@ -322,6 +305,24 @@ struct Token * lex(char *inp){
 		} else {
 			token_end = tmp;
 		}
+
+		/* LOGICAL NEGATION */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_LOGICAL_NEGATION_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "LOGICAL_NEGATION_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 
 		/* LESS_THAN_OR_EQUAL */
 		tmp = token_end;

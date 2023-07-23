@@ -121,7 +121,7 @@ struct TreeNode * Expression(){
 		 cmpstr(pt->type, "DIVISION_OP")
 		)
 	){
-		bin_op_node = Binary_OP(pt);
+		bin_op_node = Binary_OP();
 		next_term_node = Logical_And_Expression();
 
 		term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
@@ -148,8 +148,8 @@ struct TreeNode * Logical_And_Expression(){
 	while(
 		pt->type && 
 		(
-
-		 //cmpstr(pt->type, "AND_OP") ||
+		 cmpstr(pt->type, "OR_OP") ||
+		 cmpstr(pt->type, "AND_OP") ||
 
 		 cmpstr(pt->type, "EQUAL_OP") ||
 		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
@@ -194,10 +194,11 @@ struct TreeNode * Equality_Expression(){
 		pt->type && 
 		(
 
+		 //cmpstr(pt->type, "OR_OP") ||
 		 //cmpstr(pt->type, "AND_OP") ||
 
-		 //cmpstr(pt->type, "EQUAL_OP") ||
-		 //cmpstr(pt->type, "NOT_EQUAL_OP") ||
+		 cmpstr(pt->type, "EQUAL_OP") ||
+		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
 
 		 cmpstr(pt->type, "LESS_THAN_OP") ||
 		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
@@ -238,15 +239,16 @@ struct TreeNode * Relational_Expression(){
 	while(
 		pt->type && 
 		(
+		 //cmpstr(pt->type, "OR_OP") ||
 		 //cmpstr(pt->type, "AND_OP") ||
 
 		 //cmpstr(pt->type, "EQUAL_OP") ||
 		 //cmpstr(pt->type, "NOT_EQUAL_OP") ||
 
-		 //cmpstr(pt->type, "LESS_THAN_OP") ||
-		 //cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 //cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 //cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+		 cmpstr(pt->type, "LESS_THAN_OP") ||
+		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+		 cmpstr(pt->type, "GREATER_THAN_OP") ||
+		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
 
 		 cmpstr(pt->type, "ADDITION_OP") ||
 		 cmpstr(pt->type, "NEGATION_OP") ||
@@ -282,6 +284,7 @@ struct TreeNode * Addictive_Expression(){
 	while(
 		pt->type && 
 		(
+		 //cmpstr(pt->type, "OR_OP") ||
 		 //cmpstr(pt->type, "AND_OP") ||
 
 	 	 //cmpstr(pt->type, "EQUAL_OP") ||
@@ -292,8 +295,8 @@ struct TreeNode * Addictive_Expression(){
 		 //cmpstr(pt->type, "GREATER_THAN_OP") ||
 		 //cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
 
-		 //cmpstr(pt->type, "ADDITION_OP") ||
-		 //cmpstr(pt->type, "NEGATION_OP") ||
+		 cmpstr(pt->type, "ADDITION_OP") ||
+		 cmpstr(pt->type, "NEGATION_OP") ||
 
 		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
 		 cmpstr(pt->type, "DIVISION_OP")
@@ -328,6 +331,20 @@ struct TreeNode * Term(){
 	while(
 		pt->type && 
 		(
+		 //cmpstr(pt->type, "OR_OP") ||
+		 //cmpstr(pt->type, "AND_OP") ||
+
+	 	 //cmpstr(pt->type, "EQUAL_OP") ||
+		 //cmpstr(pt->type, "NOT_EQUAL_OP") ||
+
+		 //cmpstr(pt->type, "LESS_THAN_OP") ||
+		 //cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+		 //cmpstr(pt->type, "GREATER_THAN_OP") ||
+		 //cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+		 //cmpstr(pt->type, "ADDITION_OP") ||
+		 //cmpstr(pt->type, "NEGATION_OP") ||
+
 		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
 		 cmpstr(pt->type, "DIVISION_OP")
 		)

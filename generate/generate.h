@@ -9,10 +9,19 @@ void generate_addition_statement(struct TreeNode * operand1, struct TreeNode * o
 void generate_substraction_statement(struct TreeNode * operand1, struct TreeNode * operand2);
 void generate_multiplication_statement(struct TreeNode * operand1, struct TreeNode * operand2);
 void generate_division_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_or_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_and_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_equal_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_not_equal_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_less_than_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_less_than_or_equal_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_greater_than_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_greater_than_or_equal_statement(struct TreeNode * operand1, struct TreeNode * operand2);
 void generate_unary_op(struct TreeNode * node);
 void generate_term(struct TreeNode * node);
 void generate_fact(struct TreeNode * node);
 void stack_push();
 void stack_pop();
 void generate_operand(struct TreeNode * node);
+char * generate_unique_label(char * l);
 
