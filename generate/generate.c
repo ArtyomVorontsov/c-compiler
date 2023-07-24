@@ -59,6 +59,9 @@ void generate_expression(struct TreeNode * node){
 		if(strcmp(child_node->type, "EXPRESSION") == 0) {
 			generate_expression(child_node);
 		}
+		else if(strcmp(child_node->type, "LOGICAL_OR_EXPRESSION") == 0) {
+			generate_expression(child_node);
+		}
 		else if(strcmp(child_node->type, "LOGICAL_AND_EXPRESSION") == 0) {
 			generate_expression(child_node);
 		}
@@ -329,6 +332,9 @@ void generate_division_statement(struct TreeNode * operand1, struct TreeNode * o
 
 void generate_operand(struct TreeNode * node){
 	if(strcmp(node->type, "EXPRESSION") == 0) {
+		generate_expression(node);
+	}
+	else if(strcmp(node->type, "LOGICAL_OR_EXPRESSION") == 0) {
 		generate_expression(node);
 	}
 	else if(strcmp(node->type, "LOGICAL_AND_EXPRESSION") == 0) {

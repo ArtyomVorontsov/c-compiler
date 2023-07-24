@@ -5,6 +5,7 @@ bool Program();
 bool Function();
 bool Statement();
 struct TreeNode * Expression();
+struct TreeNode * Logical_Or_Expression();
 struct TreeNode * Logical_And_Expression();
 struct TreeNode * Equality_Expression();
 struct TreeNode * Relational_Expression();

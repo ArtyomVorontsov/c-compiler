@@ -134,6 +134,51 @@ struct TreeNode * Expression(){
 	return node;
 }
 
+struct TreeNode * Logical_Or_Expression(){
+	print_if_explicit("Logical_Or_Expression\n");
+	struct TreeNode * node = create_node("LOGICAL_OR_EXPRESSION", "LOGICAL_OR_EXPRESSION");
+	struct TreeNode * term_node;
+	struct TreeNode * next_term_node;
+	struct TreeNode * bin_op_node;
+
+	set_node_as_deepest(node);
+	term_node = Logical_And_Expression();
+	set_node_as_child(node, term_node); 
+
+	while(
+		pt->type && 
+		(
+		 cmpstr(pt->type, "OR_OP") ||
+		 cmpstr(pt->type, "AND_OP") ||
+
+		 cmpstr(pt->type, "EQUAL_OP") ||
+		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
+
+		 cmpstr(pt->type, "LESS_THAN_OP") ||
+		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+		 cmpstr(pt->type, "GREATER_THAN_OP") ||
+		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+		 cmpstr(pt->type, "ADDITION_OP") ||
+		 cmpstr(pt->type, "NEGATION_OP") ||
+
+		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
+		 cmpstr(pt->type, "DIVISION_OP")
+		)
+	){
+		bin_op_node = Binary_OP(pt);
+		next_term_node = Logical_And_Expression();
+
+		term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
+		remove_node_as_child(node);
+		set_node_as_child(node, term_node); 
+	}
+
+	remove_node_from_deepest();	
+	
+	return node;
+}
+
 struct TreeNode * Logical_And_Expression(){
 	print_if_explicit("Logical_And_Expression\n");
 	struct TreeNode * node = create_node("LOGICAL_AND_EXPRESSION", "LOGICAL_AND_EXPRESSION");
@@ -148,7 +193,7 @@ struct TreeNode * Logical_And_Expression(){
 	while(
 		pt->type && 
 		(
-		 cmpstr(pt->type, "OR_OP") ||
+		 //cmpstr(pt->type, "OR_OP") ||
 		 cmpstr(pt->type, "AND_OP") ||
 
 		 cmpstr(pt->type, "EQUAL_OP") ||
