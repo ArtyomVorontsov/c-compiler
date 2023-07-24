@@ -59,8 +59,10 @@ bool Function(){
 		Match("OPEN_PARENTHESIS") && 
 		Match("CLOSE_PARENTHESIS") && 
 		Match("OPEN_BRACE") && 
-		Statement() && 
+		Multi_Statement() && 
 		Match("CLOSE_BRACE");
+
+	printf("MATCH: %d\n", match);
 
 	remove_node_from_deepest();
 
@@ -70,17 +72,45 @@ bool Function(){
 	return false;
 }
 
+bool Multi_Statement(){
+	print_if_explicit("Multi_Statement\n");
+	bool match = false;
+
+	printf("TYPE: %s\n", pt->type);
+	/*while(Statement()){
+		match = true;
+	}*/
+
+	return Statement();
+}
+
 bool Statement(){
 	print_if_explicit("Statement\n");
 	bool match;
 	struct TreeNode * node = create_node("STATEMENT", "STATEMENT");
 	struct TreeNode * exp;
+	struct Token * next = pt;
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	match = Match("RETURN_KEYWORD") && (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON");
-
+	/*if(pt = next, remove_node_as_child(node), Match("RETURN_KEYWORD") && (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON")){
+		match = true;
+	} 
+	else if (pt = next, remove_node_as_child(node), (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON")){
+		match = true;
+	}
+	else*/ if (pt = next, remove_node_as_child(node), 
+		Match("INT_KEYWORD") && 
+		Match("IDENTIFIER") && 
+		Match("ASSIGN") && 
+		(exp = Expression(), set_node_as_child(node, exp), 1) && 
+		Match("SEMICOLON")
+	){
+		match = true;
+	}
+	printf("END: %s\n", pt->type);
+	printf("MATCH: %d\n", match);
 	remove_node_from_deepest();	
 
 	if(match) return true;
@@ -412,6 +442,7 @@ struct TreeNode * Factor(){
 	print_if_explicit("Factor\n");
 	struct TreeNode * node = create_node("FACTOR", "FACTOR");
 	struct TreeNode * int_node;
+	struct TreeNode * identifier_node;
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
 	struct TreeNode * un_op_node;
@@ -447,7 +478,12 @@ struct TreeNode * Factor(){
 	else if (pt->type && (cmpstr(pt->type, "INT"))){
 		int_node = Int();
 		set_node_as_child(node, int_node);
-	} else {
+	}
+	else if (pt->type && (cmpstr(pt->type, "IDENTIFIER"))){
+		//identifier_node = Identifier();
+		set_node_as_child(node, identifier_node);
+	} 
+	else {
 		set_error();
 		printf("Factor error.\n");
 		exit(1);
@@ -563,6 +599,7 @@ bool Identifier(){
 
 bool Match(char *type){
 	print_if_explicit("Match\n");
+	printf("Match %s\n", pt->type);
 	if(pt->type && cmpstr(pt->type, type)){
 		if(SILENT_ARG == false)
 			printf("\tMatch: SOURCE_CODE_POINTER: '%s'\n\tPARSER_NODE: '%s'\n", pt->type, type);

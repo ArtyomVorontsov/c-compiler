@@ -4,6 +4,7 @@ struct TreeNode * create_node(char *type, char *value);
 bool Program();
 bool Function();
 bool Statement();
+bool Multi_Statement();
 struct TreeNode * Expression();
 struct TreeNode * Logical_Or_Expression();
 struct TreeNode * Logical_And_Expression();
