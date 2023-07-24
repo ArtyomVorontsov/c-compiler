@@ -534,6 +534,7 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 			return machine_step2_IDENTIFIER_FA(p + 1);
 		case ' ':
 		case '(':
+		case ';':
 		case '\n':
 		case '\t':
 			return p - 1;

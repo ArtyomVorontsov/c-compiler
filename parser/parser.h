@@ -20,6 +20,7 @@ bool Identifier();
 struct TreeNode * Unary_OP();
 struct TreeNode * Binary_OP();
 struct TreeNode * Int();
+struct TreeNode * Identifier_OP();
 bool Match(char *type);
 void remove_node_from_deepest();
 void set_node_as_deepest(struct TreeNode * current_node);

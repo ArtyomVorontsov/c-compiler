@@ -5,6 +5,7 @@ struct TreeNode ** pns = nodes_stack;
 struct Token * pt = tokens;
 int error_tree_depth = -1;
 struct Token * error_token;
+bool expression_error = false;
 
 
 struct TreeNode * parse(){
@@ -75,18 +76,22 @@ bool Function(){
 bool Multi_Statement(){
 	print_if_explicit("Multi_Statement\n");
 	bool match = false;
+	int i = 0;
 
-	printf("TYPE: %s\n", pt->type);
-	/*while(Statement()){
+	while(Statement()){
 		match = true;
-	}*/
+		if(i++ > 1000){
+			printf("Error: expressions amount exceeded 999!\n");
+			set_error();
+			return false;
+		}
+	}
 
-	return Statement();
+	return true;
 }
-
 bool Statement(){
 	print_if_explicit("Statement\n");
-	bool match;
+	bool match = false;
 	struct TreeNode * node = create_node("STATEMENT", "STATEMENT");
 	struct TreeNode * exp;
 	struct Token * next = pt;
@@ -94,29 +99,70 @@ bool Statement(){
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	/*if(pt = next, remove_node_as_child(node), Match("RETURN_KEYWORD") && (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON")){
+	if(
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		Match("RETURN_KEYWORD") && 
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+		Match("SEMICOLON")
+	){
 		match = true;
 	} 
-	else if (pt = next, remove_node_as_child(node), (exp = Expression(), set_node_as_child(node, exp), 1) && Match("SEMICOLON")){
-		match = true;
-	}
-	else*/ if (pt = next, remove_node_as_child(node), 
-		Match("INT_KEYWORD") && 
-		Match("IDENTIFIER") && 
-		Match("ASSIGN") && 
-		(exp = Expression(), set_node_as_child(node, exp), 1) && 
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
 		Match("SEMICOLON")
 	){
 		match = true;
 	}
-	printf("END: %s\n", pt->type);
-	printf("MATCH: %d\n", match);
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		Match("INT_KEYWORD") && 
+		Match("IDENTIFIER") && 
+		Match("ASSIGN") && 
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+		Match("SEMICOLON")
+	){
+		match = true;
+	}
+
 	remove_node_from_deepest();	
 
 	if(match) return true;
-	set_error();
 
+	set_error();
 	return false;
+}
+struct TreeNode * Assignement_Expression(){
+	set_node_as_deepest(node);
+	struct TreeNode * node = create_node("ASSIGNEMENT_EXPRESSION", "ASSIGNEMENT_EXPRESSION");
+	struct TreeNode * exp;
+	set_node_as_deepest(node);
+
+	Match("INT_KEYWORD");
+	struct TreeNode * identifier_node = create_node("IDENTIFIER", pt->type);
+	pt++;
+	struct TreeNode * assigment_exp_node = create_node("ASSIGNEMENT_EXPRESSION", pt->type);
+	pt++;
+
+	assignement_op_node = Assignement_OP();
+	assignement_node = Binary_Statement(assignement_op_node, term_node, next_term_node);
+	set_node_as_deepest(assignement_op_node);
+
+	(exp = Expression(), set_node_as_child(assignement_op_node, exp), expression_error == false)
+
+	remove_node_from_deepest();	
+	Match("SEMICOLON")
+	remove_node_from_deepest();	
+}
+
+struct TreeNode * Assign_Statement(){
+
 }
 
 struct TreeNode * Expression(){
@@ -443,6 +489,7 @@ struct TreeNode * Factor(){
 	struct TreeNode * node = create_node("FACTOR", "FACTOR");
 	struct TreeNode * int_node;
 	struct TreeNode * identifier_node;
+	struct TreeNode * assignement_node;
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
 	struct TreeNode * un_op_node;
@@ -454,9 +501,8 @@ struct TreeNode * Factor(){
 		exp_node = Expression();
 
 		if (pt->type && (cmpstr(pt->type, "CLOSE_PARENTHESIS") == false)) {
+			expression_error = true;
 			set_error();
-			printf("Missing parenthesis error.\n");
-			exit(1);
 		}
 		pt++;
 
@@ -480,19 +526,33 @@ struct TreeNode * Factor(){
 		set_node_as_child(node, int_node);
 	}
 	else if (pt->type && (cmpstr(pt->type, "IDENTIFIER"))){
-		//identifier_node = Identifier();
+		identifier_node = Identifier_OP();
 		set_node_as_child(node, identifier_node);
 	} 
+	/*else if (pt->type && (cmpstr(pt->type, "ASSIGN"))){
+		assignement_node = Assignement_Statement();
+		set_node_as_child(node, assignement_node);
+	} */
 	else {
+		expression_error = true;
 		set_error();
-		printf("Factor error.\n");
-		exit(1);
 	}
 
 	remove_node_from_deepest();	
 
 	return node;	
 }
+
+/*struct TreeNode * Assignement_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
+	print_if_explicit("Assignement_Statement\n");
+	struct TreeNode * assignement_statement_node = create_node("Assignement_Statement", "Assignement_Statement");
+
+	set_node_as_child(assignement_statement_node, term_node);
+	set_node_as_child(assignement_statement_node, next_term_node);
+	set_node_as_child(op_node->children[0], binary_statement_node);
+	
+	return op_node;
+}*/
 
 struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
 	print_if_explicit("Binary_Statement\n");
@@ -529,6 +589,16 @@ struct TreeNode * Int(){
 	pt++;
 	
 	return int_node;
+}
+
+struct TreeNode * Identifier_OP(){
+	print_if_explicit("Identifier_OP\n");
+	struct TreeNode * identifier_op_node;
+
+	identifier_op_node = create_node(pt->type, pt->value.string);
+	pt++;
+	
+	return identifier_op_node;
 }
 
 struct TreeNode * Unary_OP(){
