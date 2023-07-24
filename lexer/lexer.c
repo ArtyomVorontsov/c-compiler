@@ -393,6 +393,23 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* ASSIGN */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_ASSIGN_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "ASSIGN";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
@@ -937,6 +954,17 @@ char * machine_step2_GREATER_THAN_OR_EQUAL_OP_FA(char *p) {
 			return (void *) FA_FAILED;
 	}	
 }
+
+/* ASSIGN FA */
+char * machine_ASSIGN_FA(char *p) {
+	switch (*p){
+		case '=': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
 
 /* UTILS */
 

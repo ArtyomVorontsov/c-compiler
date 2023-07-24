@@ -29,6 +29,8 @@ char * machine_CLOSE_PARENTHESIS_FA(char *p);
 
 char * machine_SEMICOLON_FA(char *p);
 
+char * machine_ASSIGN_FA(char *p);
+
 /* OPERATORS FA */
 char * machine_NEGATION_OP_FA(char *p);
 char * machine_ADDITION_OP_FA(char *p);
