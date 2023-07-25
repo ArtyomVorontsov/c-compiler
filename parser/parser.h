@@ -11,6 +11,7 @@ struct TreeNode * Logical_And_Expression();
 struct TreeNode * Equality_Expression();
 struct TreeNode * Relational_Expression();
 struct TreeNode * Addictive_Expression();
+struct TreeNode * Assignement_Expression();
 struct TreeNode * Term();
 struct TreeNode * Factor();
 struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node);
@@ -21,6 +22,10 @@ struct TreeNode * Unary_OP();
 struct TreeNode * Binary_OP();
 struct TreeNode * Int();
 struct TreeNode * Identifier_OP();
+<<<<<<< Updated upstream
+=======
+struct TreeNode * Assignement_OP();
+>>>>>>> Stashed changes
 bool Match(char *type);
 void remove_node_from_deepest();
 void set_node_as_deepest(struct TreeNode * current_node);

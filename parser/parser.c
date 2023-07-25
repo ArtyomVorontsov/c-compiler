@@ -122,15 +122,23 @@ bool Statement(){
 		(pt = next, 
 		remove_node_as_child(node), 
 		expression_error = false, 1) &&
+<<<<<<< Updated upstream
 		Match("INT_KEYWORD") && 
 		Match("IDENTIFIER") && 
 		Match("ASSIGN") && 
 		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+=======
+		(exp = Assignement_Expression(), set_node_as_child(node, exp), expression_error == false) && 
+>>>>>>> Stashed changes
 		Match("SEMICOLON")
 	){
 		match = true;
 	}
+<<<<<<< Updated upstream
 
+=======
+	printf("MATCH: %d\n", match);
+>>>>>>> Stashed changes
 	remove_node_from_deepest();	
 
 	if(match) return true;
@@ -139,6 +147,7 @@ bool Statement(){
 	return false;
 }
 struct TreeNode * Assignement_Expression(){
+<<<<<<< Updated upstream
 	set_node_as_deepest(node);
 	struct TreeNode * node = create_node("ASSIGNEMENT_EXPRESSION", "ASSIGNEMENT_EXPRESSION");
 	struct TreeNode * exp;
@@ -159,6 +168,41 @@ struct TreeNode * Assignement_Expression(){
 	remove_node_from_deepest();	
 	Match("SEMICOLON")
 	remove_node_from_deepest();	
+=======
+	struct TreeNode * node = create_node("ASSIGNEMENT_EXPRESSION", "ASSIGNEMENT_EXPRESSION");
+	struct TreeNode * exp;
+	struct TreeNode * assignement_op_node;
+	struct TreeNode * assignement_node;
+	struct TreeNode * int_keyword;
+	struct TreeNode * identifier_node;
+	set_node_as_deepest(node);
+
+	printf("1pt %s\n", pt->type);
+	// create children for assignement expression
+	int_keyword = create_node(pt->type, pt->value.string);
+	pt++;
+	set_node_as_child(node, int_keyword); 
+	printf("2pt %s\n", pt->type);
+
+	identifier_node = create_node("IDENTIFIER", pt->value.string);
+	pt++;
+	printf("3pt %s\n", pt->type);
+
+	assignement_op_node = Assignement_OP();
+	set_node_as_child(node, assignement_op_node); 
+	
+	printf("LAST pt %s\n", pt->type);
+	exp = Expression();
+
+	printf("pt %s\n", pt->type);
+	assignement_node = Binary_Statement(assignement_op_node, identifier_node, exp);
+	//set_node_as_deepest(assignement_op_node);
+
+	printf("LAST pt %s\n", pt->type);
+//	remove_node_from_deepest();
+
+	return node;
+>>>>>>> Stashed changes
 }
 
 struct TreeNode * Assign_Statement(){
@@ -631,6 +675,16 @@ struct TreeNode * Binary_OP(){
 
 	remove_node_from_deepest();
 	remove_node_from_deepest();
+
+	return node;
+}
+
+struct TreeNode * Assignement_OP(){
+	print_if_explicit("Assignement_OP\n");
+	struct TreeNode *node;
+
+	node = create_node(pt->type, pt->value.string);
+	pt++;
 
 	return node;
 }
