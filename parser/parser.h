@@ -25,6 +25,7 @@ struct TreeNode * Int();
 struct TreeNode * Identifier_OP();
 struct TreeNode * Assignement_OP();
 bool Match(char *type);
+bool compare_operator_by_precedence_level(int level);
 void remove_node_from_deepest();
 void set_node_as_deepest(struct TreeNode * current_node);
 void set_as_child(struct TreeNode * current_node);

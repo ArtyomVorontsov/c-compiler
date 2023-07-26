@@ -26,7 +26,24 @@ void generate_function(struct TreeNode * node){
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", identifier_value);
 
-	generate_statement(statement_node);
+	generate_multi_statement(statement_node);
+}
+
+void generate_multi_statement(struct TreeNode * node){
+	print_if_explicit("generate_multi_statement\n");
+	struct TreeNode * child_node;
+
+	for(int i = node->children_amount - 1; i >= 0; i--){
+		child_node = node->children[i];
+	
+		if(strcmp(child_node->type, "STATEMENT") == 0) {
+			generate_statement(child_node);
+		} 
+		else {
+			if(SILENT_ARG != true)
+				printf("No handler\n");
+		}
+	}
 }
 
 void generate_statement(struct TreeNode * node){

@@ -231,27 +231,7 @@ struct TreeNode * Logical_Or_Expression(){
 	term_node = Logical_And_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(
-		pt->type && 
-		(
-		 cmpstr(pt->type, "OR_OP") ||
-		 cmpstr(pt->type, "AND_OP") ||
-
-		 cmpstr(pt->type, "EQUAL_OP") ||
-		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "LESS_THAN_OP") ||
-		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "ADDITION_OP") ||
-		 cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(0)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Logical_And_Expression();
 
@@ -276,27 +256,7 @@ struct TreeNode * Logical_And_Expression(){
 	term_node = Equality_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(
-		pt->type && 
-		(
-		 //cmpstr(pt->type, "OR_OP") ||
-		 cmpstr(pt->type, "AND_OP") ||
-
-		 cmpstr(pt->type, "EQUAL_OP") ||
-		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "LESS_THAN_OP") ||
-		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "ADDITION_OP") ||
-		 cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(1)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Equality_Expression();
 
@@ -321,28 +281,7 @@ struct TreeNode * Equality_Expression(){
 	term_node = Relational_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(
-		pt->type && 
-		(
-
-		 //cmpstr(pt->type, "OR_OP") ||
-		 //cmpstr(pt->type, "AND_OP") ||
-
-		 cmpstr(pt->type, "EQUAL_OP") ||
-		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "LESS_THAN_OP") ||
-		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "ADDITION_OP") ||
-		 cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(2)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Relational_Expression();
 
@@ -367,27 +306,7 @@ struct TreeNode * Relational_Expression(){
 	term_node = Addictive_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(
-		pt->type && 
-		(
-		 //cmpstr(pt->type, "OR_OP") ||
-		 //cmpstr(pt->type, "AND_OP") ||
-
-		 //cmpstr(pt->type, "EQUAL_OP") ||
-		 //cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "LESS_THAN_OP") ||
-		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "ADDITION_OP") ||
-		 cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(3)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Addictive_Expression();
 
@@ -412,27 +331,7 @@ struct TreeNode * Addictive_Expression(){
 	term_node = Term();
 	set_node_as_child(node, term_node); 
 
-	while(
-		pt->type && 
-		(
-		 //cmpstr(pt->type, "OR_OP") ||
-		 //cmpstr(pt->type, "AND_OP") ||
-
-	 	 //cmpstr(pt->type, "EQUAL_OP") ||
-		 //cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 //cmpstr(pt->type, "LESS_THAN_OP") ||
-		 //cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 //cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 //cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "ADDITION_OP") ||
-		 cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(4)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Term();
 
@@ -459,27 +358,7 @@ struct TreeNode * Term(){
 	set_node_as_child(node, factor_node);
 
 
-	while(
-		pt->type && 
-		(
-		 //cmpstr(pt->type, "OR_OP") ||
-		 //cmpstr(pt->type, "AND_OP") ||
-
-	 	 //cmpstr(pt->type, "EQUAL_OP") ||
-		 //cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 //cmpstr(pt->type, "LESS_THAN_OP") ||
-		 //cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 //cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 //cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 //cmpstr(pt->type, "ADDITION_OP") ||
-		 //cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(5)){
 		op_node = Binary_OP(pt);
 		next_factor_node = Factor(pt + 1);
 
@@ -539,10 +418,6 @@ struct TreeNode * Factor(){
 		identifier_node = Identifier_OP();
 		set_node_as_child(node, identifier_node);
 	} 
-	/*else if (pt->type && (cmpstr(pt->type, "ASSIGN"))){
-		assignement_node = Assignement_Statement();
-		set_node_as_child(node, assignement_node);
-	} */
 	else {
 		expression_error = true;
 		set_error();
@@ -703,6 +578,86 @@ bool Match(char *type){
 	return false;
 }
 
+bool compare_operator_by_precedence_level(int level){
+	switch(level){
+		case 0:
+			return cmpstr(pt->type, "OR_OP") ||
+			cmpstr(pt->type, "AND_OP") ||
+
+			cmpstr(pt->type, "EQUAL_OP") ||
+			cmpstr(pt->type, "NOT_EQUAL_OP") ||
+
+			cmpstr(pt->type, "LESS_THAN_OP") ||
+			cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+			cmpstr(pt->type, "ADDITION_OP") ||
+			cmpstr(pt->type, "NEGATION_OP") ||
+
+			cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		case 1:
+			return cmpstr(pt->type, "AND_OP") ||
+
+			cmpstr(pt->type, "EQUAL_OP") ||
+			cmpstr(pt->type, "NOT_EQUAL_OP") ||
+
+			cmpstr(pt->type, "LESS_THAN_OP") ||
+			cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+			cmpstr(pt->type, "ADDITION_OP") ||
+			cmpstr(pt->type, "NEGATION_OP") ||
+
+			cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		case 2:
+			return cmpstr(pt->type, "EQUAL_OP") ||
+			cmpstr(pt->type, "NOT_EQUAL_OP") ||
+
+			cmpstr(pt->type, "LESS_THAN_OP") ||
+			cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+			cmpstr(pt->type, "ADDITION_OP") ||
+			cmpstr(pt->type, "NEGATION_OP") ||
+
+			cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		case 3:
+			return cmpstr(pt->type, "LESS_THAN_OP") ||
+			cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+			cmpstr(pt->type, "ADDITION_OP") ||
+			cmpstr(pt->type, "NEGATION_OP") ||
+
+			cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		case 4:
+			return cmpstr(pt->type, "ADDITION_OP") ||
+			cmpstr(pt->type, "NEGATION_OP") ||
+
+			cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		case 5:
+			return cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		default:
+			return true;
+	}
+
+}
 
 void set_as_child(struct TreeNode * current_node){
 	// Assign as a child to previous node
