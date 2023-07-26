@@ -186,27 +186,7 @@ struct TreeNode * Expression(){
 	term_node = Logical_And_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(
-		pt->type && 
-		(
-		 cmpstr(pt->type, "OR_OP") ||
-		 cmpstr(pt->type, "AND_OP") ||
-
-		 cmpstr(pt->type, "EQUAL_OP") ||
-		 cmpstr(pt->type, "NOT_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "LESS_THAN_OP") ||
-		 cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OP") ||
-		 cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
-
-		 cmpstr(pt->type, "ADDITION_OP") ||
-		 cmpstr(pt->type, "NEGATION_OP") ||
-
-		 cmpstr(pt->type, "MULTIPLICATION_OP") ||
-		 cmpstr(pt->type, "DIVISION_OP")
-		)
-	){
+	while(pt->type && compare_operator_by_precedence_level(0)){
 		bin_op_node = Binary_OP();
 		next_term_node = Logical_And_Expression();
 
@@ -382,6 +362,7 @@ struct TreeNode * Factor(){
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
 	struct TreeNode * un_op_node;
+	struct Token * next = pt;
 
 	set_node_as_deepest(node);
 	if (pt->type && (cmpstr(pt->type, "OPEN_PARENTHESIS"))){
@@ -409,14 +390,20 @@ struct TreeNode * Factor(){
 	){
 		un_op_node = Unary_Statement();
 		set_node_as_child(node, un_op_node);
+		next = pt;
 	}
-	else if (pt->type && (cmpstr(pt->type, "INT"))){
+	else if (pt = next, Declaration_Statement()){
+		next = pt;
+	}
+	else if (pt = next, pt->type && (cmpstr(pt->type, "INT"))){
 		int_node = Int();
 		set_node_as_child(node, int_node);
+		next = pt;
 	}
-	else if (pt->type && (cmpstr(pt->type, "IDENTIFIER"))){
+	else if (pt = next, pt->type && (cmpstr(pt->type, "IDENTIFIER"))){
 		identifier_node = Identifier_OP();
 		set_node_as_child(node, identifier_node);
+		next = pt;
 	} 
 	else {
 		expression_error = true;
@@ -426,6 +413,23 @@ struct TreeNode * Factor(){
 	remove_node_from_deepest();	
 
 	return node;	
+}
+
+bool Declaration_Statement(){
+	print_if_explicit("Declaration_Statement\n");
+	struct TreeNode * node = create_node("DECLARATION_STATEMENT", "DECLARATION_STATEMENT");
+	int success = false;
+
+	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(pt->type && Type() && Identifier()){
+		success = true;
+	}
+
+	remove_node_from_deepest();
+
+	return success;
 }
 
 struct TreeNode * Assignement_Statement(struct TreeNode * assignement_op_node, struct TreeNode * identifier_node, struct TreeNode * expression_node){
@@ -582,6 +586,7 @@ bool compare_operator_by_precedence_level(int level){
 	switch(level){
 		case 0:
 			return cmpstr(pt->type, "OR_OP") ||
+
 			cmpstr(pt->type, "AND_OP") ||
 
 			cmpstr(pt->type, "EQUAL_OP") ||
