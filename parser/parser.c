@@ -157,22 +157,28 @@ struct TreeNode * Expression(){
 	struct TreeNode * term_node;
 	struct TreeNode * next_term_node;
 	struct TreeNode * bin_op_node;
+	struct Token * next = pt;
 
 	set_node_as_deepest(node);
-	term_node = Logical_And_Expression();
-	set_node_as_child(node, term_node); 
-
-	while(pt->type && compare_operator_by_precedence_level(0)){
-		bin_op_node = Binary_OP();
-		next_term_node = Logical_And_Expression();
-
-		term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
-		remove_node_as_child(node);
-		set_node_as_child(node, term_node); 
-	}
-
-	remove_node_from_deepest();	
 	
+	if ((pt = next, remove_as_child(), pt->type) && Assignement_Statement()){
+		next = pt;
+	} 
+	else if(pt = next, remove_as_child(), 1){
+		term_node = Logical_And_Expression();
+		set_node_as_child(node, term_node); 
+
+		while(pt->type && compare_operator_by_precedence_level(0)){
+			bin_op_node = Binary_OP();
+			next_term_node = Logical_And_Expression();
+
+			term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
+			remove_node_as_child(node);
+			set_node_as_child(node, term_node); 
+		}
+	}
+	
+	remove_node_from_deepest();	
 	return node;
 }
 
@@ -368,17 +374,17 @@ struct TreeNode * Factor(){
 		set_node_as_child(node, un_op_node);
 		next = pt;
 	}
-	else if ((pt = next, printf("INT %s\n", pt->type), remove_as_child(), pt->type) && (cmpstr(pt->type, "INT"))){
+	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "INT"))){
 		int_node = Int();
 		set_node_as_child(node, int_node);
 		next = pt;
 	}
-	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER") && cmpstr((pt + 1)->type, "SEMICOLON"))){
-		identifier_node = Identifier_OP();
-		set_node_as_child(node, identifier_node);
+	else if ((pt = next, remove_as_child(), pt->type) && cmpstr(pt->type, "SEMICOLON")){
 		next = pt;
 	} 
-	else if ((pt = next, remove_as_child(), pt->type) && Assignement_Statement()){
+	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER"))){
+		identifier_node = Identifier_OP();
+		set_node_as_child(node, identifier_node);
 		next = pt;
 	}
 	else {
@@ -387,8 +393,6 @@ struct TreeNode * Factor(){
 		expression_error = true;
 		set_error();
 	}
-
-	printf("FACTOR END %s\n", pt->type);
 
 	remove_node_from_deepest();	
 
@@ -453,7 +457,7 @@ bool Assignement_Statement(){
 
 	set_as_child(node);
 	set_node_as_deepest(node);
-	if(cmpstr(pt->type, "IDENTIFIER")){
+	if(cmpstr(pt->type, "IDENTIFIER") && cmpstr((pt + 1)->type, "ASSIGN")){
 
 		identifier_op = Identifier_OP();
 		assignement_op = Assignement_OP();
