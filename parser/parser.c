@@ -137,7 +137,11 @@ bool Statement(){
 		Match("SEMICOLON")
 	){
 		match = true;
-	} 
+	} else {
+		pt = next;
+		remove_node_as_child(node);
+		expression_error = false;
+	}
 	remove_node_from_deepest();	
 
 	if(match) return true;
@@ -364,20 +368,19 @@ struct TreeNode * Factor(){
 		set_node_as_child(node, un_op_node);
 		next = pt;
 	}
-	else if ((pt = next, remove_as_child(), pt->type) && Assignement_Statement()){
-		next = pt;
-	}
 	else if ((pt = next, printf("INT %s\n", pt->type), remove_as_child(), pt->type) && (cmpstr(pt->type, "INT"))){
-		printf("INT MATCH!!\n");
 		int_node = Int();
 		set_node_as_child(node, int_node);
 		next = pt;
 	}
-	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER"))){
+	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER") && cmpstr((pt + 1)->type, "SEMICOLON"))){
 		identifier_node = Identifier_OP();
 		set_node_as_child(node, identifier_node);
 		next = pt;
 	} 
+	else if ((pt = next, remove_as_child(), pt->type) && Assignement_Statement()){
+		next = pt;
+	}
 	else {
 		pt = next;
 	       	remove_as_child();
@@ -391,23 +394,6 @@ struct TreeNode * Factor(){
 
 	return node;
 }
-/*
-bool Declaration_Statement(){
-	print_if_explicit("Declaration_Statement\n");
-	struct TreeNode * node = create_node("DECLARATION_STATEMENT", "DECLARATION_STATEMENT");
-	int success = false;
-
-	set_as_child(node);
-	set_node_as_deepest(node);
-
-	if(pt->type && Type() && Identifier()){
-		success = true;
-	}
-
-	remove_node_from_deepest();
-
-	return success;
-} */
 
  struct TreeNode * Declaration_Statement(){
 	print_if_explicit("Declaration_Statement\n");
@@ -425,13 +411,15 @@ bool Declaration_Statement(){
 		pt++;
 		set_node_as_child(node, int_keyword); 
 
-		identifier_node = create_node("IDENTIFIER", pt->value.string);
-		pt++;
 
-		if(cmpstr(pt->type, "SEMICOLON")){
+		if(cmpstr((pt + 1)->type, "SEMICOLON")){
+			identifier_node = create_node("IDENTIFIER", pt->value.string);
+			pt++;
 			set_node_as_child(node, identifier_node); 
 		} 
-		else if (cmpstr(pt->type, "ASSIGN")) {
+		else if (cmpstr((pt + 1)->type, "ASSIGN")) {
+			identifier_node = create_node("IDENTIFIER", pt->value.string);
+			pt++;
 			assignement_op_node = Assignement_OP();
 			set_node_as_child(node, assignement_op_node); 
 			
@@ -439,44 +427,19 @@ bool Declaration_Statement(){
 			set_node_as_child(assignement_op_node, identifier_node); 
 			set_node_as_child(assignement_op_node, exp); 
 			
-			//assignement_node = Assignement_Statement(assignement_op_node, identifier_node, exp);
-
 		}
 		else if (cmpstr(pt->type, "COMA")) {
 			printf("COMA IS NOT SUPPORTED!\n");
 		}
 	} else {
-		printf("ERRROR NODEE %s!\n", pt->type);
 		expression_error = true;
 		set_error();
 	}
 
 	remove_node_from_deepest();
 
-	printf("NODEE %s!\n", pt->type);
 	return node;
 } 
-
-/* bool Declaration_Statement(){
-	print_if_explicit("Declaration_Statement\n");
-	struct TreeNode * node = create_node("DECLARATION_STATEMENT", "DECLARATION_STATEMENT");
-	int success = false;
-	struct Token * next = pt;
-
-	set_as_child(node);
-	set_node_as_deepest(node);
-
-	if((pt = next, remove_as_child(), pt->type) && Type() && Identifier() && Match("ASSIGN") && Expression()){
-		success = true;
-	}
-	else if((pt = next, remove_as_child(), pt->type) && Type() && Identifier() && Match("ASSIGN")){
-		success = true;
-	}
-
-	remove_node_from_deepest();
-
-	return success; 
-} */
 
 bool Assignement_Statement(){
 	print_if_explicit("Assignement_Statement\n");
@@ -485,65 +448,27 @@ bool Assignement_Statement(){
 	int success = false;
 	struct Token * next = pt;
 	struct TreeNode * exp;
+	struct TreeNode * identifier_op;
+	struct TreeNode * assignement_op;
 
 	set_as_child(node);
 	set_node_as_deepest(node);
+	if(cmpstr(pt->type, "IDENTIFIER")){
 
-	if((pt = next, remove_as_child(), pt->type) && Identifier() && Match("ASSIGN") && (exp = Expression())){
-		set_as_child(exp);
+		identifier_op = Identifier_OP();
+		assignement_op = Assignement_OP();
+		exp = Expression();
+
+		set_as_child(assignement_op);
+		set_node_as_child(assignement_op, identifier_op);
+		set_node_as_child(assignement_op, exp);
 		success = true;
-	} 
+	}
 
 	remove_node_from_deepest();
 
 	return success; 
-/*
-	print_if_explicit("Assignement_Statement\n");
-	struct TreeNode * assignement_statement_node = create_node("ASSIGNEMENT_STATEMENT", "ASSIGNEMENT_STATEMENT");
-
-	set_node_as_child(assignement_op_node, identifier_node);
-	set_node_as_child(assignement_op_node, expression_node);
-	set_node_as_child(assignement_statement_node, assignement_op_node); 
-	
-	return assignement_statement_node; */
 }
-/*
-struct TreeNode * Assignement_Statement(struct TreeNode * assignement_op_node, struct TreeNode * identifier_node, struct TreeNode * expression_node){
-	print_if_explicit("Assignement_Statement\n");
-	printf("AAAAAAAAA %s\n", pt->type);
-	struct TreeNode * node = create_node("ASSIGNEMENT_STATEMENT", "ASSIGNEMENT_STATEMENT");
-	int success = false;
-	struct Token * next = pt;
-
-	set_as_child(node);
-	set_node_as_deepest(node);
-
-	if((pt = next, remove_as_child(), pt->type) && Type() && Identifier() && Match("ASSIGN") && Int()){
-		success = true;
-	}
-	else if((pt = next, remove_as_child(), pt->type) && Type() && Identifier() && Match("ASSIGN") && Identifier()){
-		success = true;
-	}
-	else if((pt = next, remove_as_child(), pt->type) && Identifier() && Match("ASSIGN") && Int()){
-		success = true;
-	}
-	else if((pt = next, remove_as_child(), pt->type) && Identifier() && Match("ASSIGN") && Identifier()){
-		success = true;
-	}
-
-	remove_node_from_deepest();
-
-	return success; 
-
-	print_if_explicit("Assignement_Statement\n");
-	struct TreeNode * assignement_statement_node = create_node("ASSIGNEMENT_STATEMENT", "ASSIGNEMENT_STATEMENT");
-
-	set_node_as_child(assignement_op_node, identifier_node);
-	set_node_as_child(assignement_op_node, expression_node);
-	set_node_as_child(assignement_statement_node, assignement_op_node); 
-	
-	return assignement_statement_node;
-} */
 
 struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node){
 	print_if_explicit("Binary_Statement\n");

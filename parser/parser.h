@@ -17,8 +17,6 @@ struct TreeNode * Factor();
 struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node);
 struct TreeNode * Unary_Statement();
 bool Assignement_Statement();
-//struct TreeNode * Assignement_Statement(struct TreeNode * assignement_op_node, struct TreeNode * identifier_node, struct TreeNode * expression_node);
-//bool Declaration_Statement();
 struct TreeNode * Declaration_Statement();
 bool Type();
 bool Identifier();
