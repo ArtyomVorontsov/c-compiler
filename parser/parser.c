@@ -339,7 +339,7 @@ struct TreeNode * Factor(){
 	print_if_explicit("Factor\n");
 	struct TreeNode * node = create_node("FACTOR", "FACTOR");
 	struct TreeNode * int_node;
-	struct TreeNode * identifier_node;
+	struct TreeNode * var_node;
 	struct TreeNode * assignement_node;
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
@@ -383,8 +383,8 @@ struct TreeNode * Factor(){
 		next = pt;
 	} 
 	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER"))){
-		identifier_node = Identifier_OP();
-		set_node_as_child(node, identifier_node);
+		var_node = Var();
+		set_node_as_child(node, var_node);
 		next = pt;
 	}
 	else {
@@ -406,7 +406,7 @@ struct TreeNode * Factor(){
 	struct TreeNode * assignement_op_node;
 	struct TreeNode * assignement_node;
 	struct TreeNode * int_keyword;
-	struct TreeNode * identifier_node;
+	struct TreeNode * var_node;
 	set_node_as_deepest(node);
 
 
@@ -417,18 +417,16 @@ struct TreeNode * Factor(){
 
 
 		if(cmpstr((pt + 1)->type, "SEMICOLON")){
-			identifier_node = create_node("IDENTIFIER", pt->value.string);
-			pt++;
-			set_node_as_child(node, identifier_node); 
+			var_node = Var();
+			set_node_as_child(node, var_node); 
 		} 
 		else if (cmpstr((pt + 1)->type, "ASSIGN")) {
-			identifier_node = create_node("IDENTIFIER", pt->value.string);
-			pt++;
+			var_node = Var();
 			assignement_op_node = Assignement_OP();
 			set_node_as_child(node, assignement_op_node); 
 			
 			exp = Expression();
-			set_node_as_child(assignement_op_node, identifier_node); 
+			set_node_as_child(assignement_op_node, var_node); 
 			set_node_as_child(assignement_op_node, exp); 
 			
 		}
@@ -452,19 +450,19 @@ bool Assignement_Statement(){
 	int success = false;
 	struct Token * next = pt;
 	struct TreeNode * exp;
-	struct TreeNode * identifier_op;
+	struct TreeNode * var_node;
 	struct TreeNode * assignement_op;
 
 	set_as_child(node);
 	set_node_as_deepest(node);
 	if(cmpstr(pt->type, "IDENTIFIER") && cmpstr((pt + 1)->type, "ASSIGN")){
 
-		identifier_op = Identifier_OP();
+		var_node = Var();
 		assignement_op = Assignement_OP();
 		exp = Expression();
 
 		set_as_child(assignement_op);
-		set_node_as_child(assignement_op, identifier_op);
+		set_node_as_child(assignement_op, var_node);
 		set_node_as_child(assignement_op, exp);
 		success = true;
 	}
@@ -499,6 +497,17 @@ struct TreeNode * Unary_Statement(){
 	set_node_as_child(un_op_node, fact_node);
 	
 	return un_op_node;
+}
+
+struct TreeNode * Var(){
+	print_if_explicit("Var\n");
+	struct TreeNode * node = create_node("VAR", "VAR");
+	struct TreeNode * identifier_node;
+
+	identifier_node = Identifier_OP();
+	set_node_as_child(node, identifier_node);
+	
+	return node;
 }
 
 struct TreeNode * Int(){

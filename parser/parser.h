@@ -20,6 +20,7 @@ bool Assignement_Statement();
 struct TreeNode * Declaration_Statement();
 bool Type();
 bool Identifier();
+struct TreeNode * Var();
 struct TreeNode * Unary_OP();
 struct TreeNode * Binary_OP();
 struct TreeNode * Int();
