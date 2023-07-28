@@ -161,7 +161,7 @@ struct TreeNode * Expression(){
 
 	set_node_as_deepest(node);
 	
-	if ((pt = next, remove_as_child(), pt->type) && Assignement_Statement()){
+	if ((pt = next, remove_as_child(), pt->type) && Assignement_Expression()){
 		next = pt;
 	} 
 	else if(pt = next, remove_as_child(), 1){
@@ -443,10 +443,10 @@ struct TreeNode * Factor(){
 	return node;
 } 
 
-bool Assignement_Statement(){
-	print_if_explicit("Assignement_Statement\n");
-	printf("Assignement_Statement %s\n", pt->type);
-	struct TreeNode * node = create_node("ASSIGNEMENT_STATEMENT", "ASSIGNEMENT_STATEMENT");
+bool Assignement_Expression(){
+	print_if_explicit("Assignement_Expression\n");
+	printf("Assignement_Expression %s\n", pt->type);
+	struct TreeNode * node = create_node("ASSIGNEMENT_EXPRESSION", "ASSIGNEMENT_EXPRESSION");
 	int success = false;
 	struct Token * next = pt;
 	struct TreeNode * exp;
