@@ -31,9 +31,10 @@ void generate_function(struct TreeNode * node){
 	char *identifier_value = node->children[1]->value;
 	struct TreeNode * statement_node = node->children[5];
 
-	generate_prologue();
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", identifier_value);
+	generate_prologue();
 	generate_multi_statement(statement_node);
 	generate_epilogue();
 }
@@ -74,13 +75,16 @@ void generate_statement(struct TreeNode * node){
 	print_if_explicit("generate_statement\n");
 	struct TreeNode * child_node;
 
-	for(int i = 0; i < node->children_amount; i++){
+	for(int i = node->children_amount - 1; i > -1; i--){
 		child_node = node->children[i];
 	
 		if(strcmp(child_node->type, "EXPRESSION") == 0) {
 			generate_expression(child_node);
 		} 
 		else if(strcmp(child_node->type, "RETURN_KEYWORD") == 0) {
+			generate_epilogue();
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# RETURN\n");	
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "ret\n");	
 		} 
 		else if(strcmp(child_node->type, "DECLARATION_STATEMENT") == 0) {
@@ -101,15 +105,19 @@ void generate_declaration_statement(struct TreeNode * node){
 	struct TreeNode * identifier_node;
 	int var_index = -1;
 
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# DECLARATION STATEMENT\n");	
 	if(strcmp(second_child->type, "ASSIGN") == 0){
 		// Declaration of variable with assignement
 		var_node = second_child->children[0];
 		exp_node = second_child->children[1];
+		printf("EXPRESSION NODE: %s\n", exp_node->type);
 
 		// Check if variable already exists
 		var_index = find_var_index_by_name(var_node->children[0]->value);
+		printf("VAR INDEX: %d\n", var_index);
 
-		if(var_index > -1){
+		if(var_index == -1){
 			// generate expression which will be assigned to var
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# INIT VAR\n");	
@@ -118,7 +126,7 @@ void generate_declaration_statement(struct TreeNode * node){
 			// push var on stack
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PUSH VAR ON TO THE STACK\n");	
-			asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
 
 			// Register variable
 			register_var(var_node->children[0]->value);
@@ -156,56 +164,45 @@ void generate_declaration_statement(struct TreeNode * node){
 			exit(1);
 		}
 	}
-
-	// check if var exists 
-	// generate expression which will be assigned to var
-	// push on stack
-	// register var in map
-	// push var on stack
-	
 }
 
 void generate_expression(struct TreeNode * node){
 	print_if_explicit("generate_expression\n");
-	struct TreeNode * child_node;
+	struct TreeNode * child_node = node->children[0];
 
-	for(int i = 0; i < node->children_amount; i++){
-		child_node = node->children[i];
-
-		if(strcmp(child_node->type, "EXPRESSION") == 0) {
-			generate_expression(child_node);
-		}
-		else if(strcmp(child_node->type, "LOGICAL_OR_EXPRESSION") == 0) {
-			generate_expression(child_node);
-		}
-		else if(strcmp(child_node->type, "LOGICAL_AND_EXPRESSION") == 0) {
-			generate_expression(child_node);
-		}
-		else if(strcmp(child_node->type, "EQUALITY_EXPRESSION") == 0) {
-			generate_expression(child_node);
-		}
-		else if(strcmp(child_node->type, "RELATIONAL_EXPRESSION") == 0) {
-			generate_expression(child_node);
-		}
-		else if(strcmp(child_node->type, "ADDICTIVE_EXPRESSION") == 0) {
-			generate_expression(child_node);
-		}
-		else if(strcmp(child_node->type, "BINARY_OP") == 0) {
-			generate_binary_op(child_node);
-		}
-		else if(strcmp(child_node->type, "TERM") == 0) {
-			generate_term(child_node);
-		}
-		else if(strcmp(child_node->type, "FACTOR") == 0) {
-			generate_fact(child_node);
-		}
-		else if(strcmp(child_node->type, "ASSIGNEMENT_EXPRESSION") == 0) {
-			generate_assignement_expression(child_node);
-		}
-		else {
-			if(SILENT_ARG != true)
-				printf("No handler\n");
-		}
+	if(strcmp(child_node->type, "EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "LOGICAL_OR_EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "LOGICAL_AND_EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "EQUALITY_EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "RELATIONAL_EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "ADDICTIVE_EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "BINARY_OP") == 0) {
+		generate_binary_op(child_node);
+	}
+	else if(strcmp(child_node->type, "TERM") == 0) {
+		generate_term(child_node);
+	}
+	else if(strcmp(child_node->type, "FACTOR") == 0) {
+		generate_fact(child_node);
+	}
+	else if(strcmp(child_node->type, "ASSIGNEMENT_EXPRESSION") == 0) {
+		generate_assignement_expression(child_node);
+	}
+	else {
+		if(SILENT_ARG != true)
+			printf("No handler\n");
 	}
 }
 
@@ -218,19 +215,20 @@ void generate_assignement_expression(struct TreeNode * node){
 	int var_index;
 
 	// Declaration of variable with assignement
-	identifier_node = child_node->children[0];
-	var_node = identifier_node->children[0];
+	var_node = child_node->children[0];
+	identifier_node = var_node->children[0];
 	exp_node = child_node->children[1];
 
 	// Check if variable already exists
-	var_index = find_var_index_by_name(var_node->children[0]->value);
+	var_index = find_var_index_by_name(identifier_node->value);
 
-	if(var_index < -1){
+	if(var_index > -1){
 		// generate expression which will be assigned to var
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# ASSIGN VAR\n");	
 		generate_expression(exp_node);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %d(%%ebp)", var_map[var_index]->offset);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %d(%%ebp)\n", var_map[var_index]->offset);
 	} else {
 		printf("ERROR: Variable %s is not declared.\n", var_map[var_index]->name);
 	}
@@ -558,6 +556,12 @@ void generate_fact(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# SET INT\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $%s, %%eax\n", child_node->value);	
 	}
+	if(strcmp(child_node->type, "VAR") == 0) {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# REFERENCE VAR\n");
+		int index = find_var_index_by_name(child_node->children[0]->value);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %d(%%ebp), %%eax\n", var_map[index]->offset);
+	}
 	else if(strcmp(child_node->type, "UNARY_OP") == 0) {
 		generate_unary_op(child_node->children[0]);
 	}
@@ -598,7 +602,7 @@ void register_var(char * name){
 		exit(1);
 	}
 
-	var_map[registered_var_amount] = create_var_enity(name, (registered_var_amount + 1)* 4);
+	var_map[registered_var_amount] = create_var_enity(name, -(registered_var_amount + 1) * 4);
 	registered_var_amount++;
 }
 
