@@ -138,6 +138,7 @@ void generate_declaration_statement(struct TreeNode * node){
 			register_var(var_node->children[0]->value);
 		} else {
 			printf("ERROR: Variable %s is already declared.\n", var_map[var_index]->name);
+			exit(1);
 		}
 
 	} else {
@@ -165,7 +166,6 @@ void generate_declaration_statement(struct TreeNode * node){
 			// Register variable
 			register_var(var_node->children[0]->value);
 		} else {
-			printf("ERROR: ");
 			printf("ERROR: Variable %s is already declared.\n", var_map[var_index]->name);
 			exit(1);
 		}
@@ -226,18 +226,14 @@ void generate_assignement_expression(struct TreeNode * node){
 	exp_node = child_node->children[1];
 
 	// Check if variable already exists
-	var_index = find_var_index_by_name(identifier_node->value);
+	var_index = find_var_index_by_name_with_error(identifier_node->value);
 
-	if(var_index > -1){
-		// generate expression which will be assigned to var
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# ASSIGN VAR\n");	
-		generate_expression(exp_node);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %d(%%ebp)\n", var_map[var_index]->offset);
-	} else {
-		printf("ERROR: Variable %s is not declared.\n", var_map[var_index]->name);
-	}
+	// generate expression which will be assigned to var
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# ASSIGN VAR\n");	
+	generate_expression(exp_node);
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %d(%%ebp)\n", var_map[var_index]->offset);
 }
 
 
@@ -565,7 +561,7 @@ void generate_fact(struct TreeNode * node){
 	if(strcmp(child_node->type, "VAR") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# REFERENCE VAR\n");
-		int index = find_var_index_by_name(child_node->children[0]->value);
+		int index = find_var_index_by_name_with_error(child_node->children[0]->value);
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %d(%%ebp), %%eax\n", var_map[index]->offset);
 	}
 	else if(strcmp(child_node->type, "UNARY_OP") == 0) {
