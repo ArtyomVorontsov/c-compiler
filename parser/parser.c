@@ -445,7 +445,6 @@ struct TreeNode * Factor(){
 
 bool Assignement_Expression(){
 	print_if_explicit("Assignement_Expression\n");
-	printf("Assignement_Expression %s\n", pt->type);
 	struct TreeNode * node = create_node("ASSIGNEMENT_EXPRESSION", "ASSIGNEMENT_EXPRESSION");
 	int success = false;
 	struct Token * next = pt;
@@ -456,7 +455,6 @@ bool Assignement_Expression(){
 	set_as_child(node);
 	set_node_as_deepest(node);
 	if(cmpstr(pt->type, "IDENTIFIER") && cmpstr((pt + 1)->type, "ASSIGN")){
-
 		var_node = Var();
 		assignement_op = Assignement_OP();
 		exp = Expression();
