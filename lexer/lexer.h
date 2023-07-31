@@ -53,6 +53,20 @@ char * machine_GREATER_THAN_OP_FA(char *p);
 char * machine_GREATER_THAN_OR_EQUAL_OP_FA(char *p);
 char * machine_step2_GREATER_THAN_OR_EQUAL_OP_FA(char *p);
 
+/* CONDITIONALS */
+char * machine_IF_KEYWORD_FA(char *p);
+char * machine_step2_IF_KEYWORD_FA(char *p);
+char * machine_step3_IF_KEYWORD_FA(char *p);
+
+char * machine_ELSE_KEYWORD_FA(char *p);
+char * machine_step2_ELSE_KEYWORD_FA(char *p);
+char * machine_step3_ELSE_KEYWORD_FA(char *p);
+char * machine_step4_ELSE_KEYWORD_FA(char *p);
+char * machine_step5_ELSE_KEYWORD_FA(char *p);
+
+char * machine_COLON_OP_FA(char *p);
+char * machine_QUESTION_MARK_OP_FA(char *p);
+
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 void set_new_line(char *p);

@@ -150,6 +150,40 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* IF_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_IF_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "IF_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* ELSE_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_ELSE_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "ELSE_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* OPERATORS */
 
 		/* NEGATION */
@@ -410,6 +444,40 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* COLON */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_COLON_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "COLON_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* QUESTION_MARK */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_QUESTION_MARK_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "QUESTION_MARK_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
@@ -534,6 +602,7 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 			return machine_step2_IDENTIFIER_FA(p + 1);
 		case ' ':
 		case '(':
+		case ')':
 		case ';':
 		case '\n':
 		case '\t':
@@ -966,6 +1035,102 @@ char * machine_ASSIGN_FA(char *p) {
 	}	
 }
 
+/* CONDITIONALS */
+char * machine_IF_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'i': 
+			return machine_step2_IF_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_IF_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'f': 
+			return machine_step3_IF_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_IF_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ' ': 
+		case '(': 
+		case '\n': 
+		case '\t': 
+			return p - 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_ELSE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'e': 
+			return machine_step2_ELSE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_ELSE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'l': 
+			return machine_step3_ELSE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_ELSE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 's': 
+			return machine_step4_ELSE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step4_ELSE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'e': 
+			return machine_step5_ELSE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step5_ELSE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ' ': 
+		case '{': 
+		case '\n': 
+		case '\t': 
+			return p - 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_COLON_OP_FA(char *p) {
+	switch (*p){
+		case ':': 
+			return p;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_QUESTION_MARK_OP_FA(char *p) {
+	switch (*p){
+		case '?': 
+			return p + 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
 
 /* UTILS */
 
