@@ -60,7 +60,7 @@ bool Function(){
 		Match("OPEN_PARENTHESIS") && 
 		Match("CLOSE_PARENTHESIS") && 
 		Match("OPEN_BRACE") && 
-		Multi_Statement() && 
+		Function_Body() && 
 		Match("CLOSE_BRACE");
 
 	remove_node_from_deepest();
@@ -71,17 +71,45 @@ bool Function(){
 	return false;
 }
 
-bool Multi_Statement(){
-	print_if_explicit("Multi_Statement\n");
+bool Block_Item(){
+	print_if_explicit("Block_Item\n");
 	bool match = false;
-	int i = 0;
+	struct TreeNode * node = create_node("BLOCK_ITEM", "BLOCK_ITEM");
+	struct TreeNode * exp;
 	struct Token * next = pt;
-	struct TreeNode * node = create_node("MULTI_STATEMENT", "MULTI_STATEMENT");
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	while(Statement()){
+	if(pt = next, remove_node_as_child(node), Statement()){ 
+		match = true;
+	}
+	else if (
+		pt = next, remove_node_as_child(node), Declaration()
+	){
+		match = true;
+	} 
+
+
+	remove_node_from_deepest();	
+
+	if(match) return true;
+
+	set_error();
+	return false;
+}
+
+bool Function_Body(){
+	print_if_explicit("Function_Body\n");
+	bool match = false;
+	int i = 0;
+	struct Token * next = pt;
+	struct TreeNode * node = create_node("FUNCTION_BODY", "FUNCTION_BODY");
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	while(Block_Item()){
 		next = pt;
 		match = true;
 		if(i++ > 1000){
@@ -129,6 +157,7 @@ bool Statement(){
 	){
 		match = true;
 	}
+	/*
 	else if (
 		(pt = next, 
 		remove_node_as_child(node), 
@@ -137,7 +166,17 @@ bool Statement(){
 		Match("SEMICOLON")
 	){
 		match = true;
-	} else {
+	} 
+	*/
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		(exp = Conditional(), set_node_as_child(node, exp), expression_error == false)
+	){
+		match = true;
+	}
+	else {
 		pt = next;
 		remove_node_as_child(node);
 		expression_error = false;
@@ -148,6 +187,61 @@ bool Statement(){
 
 	set_error();
 	return false;
+}
+
+struct TreeNode * Conditional(){
+	print_if_explicit("Conditional\n");
+	struct TreeNode * node = create_node("CONDITIONAL", "CONDITIONAL");
+	struct TreeNode * if_node = create_node("IF_CONDITIONAL", "IF_CONDITIONAL");
+	struct TreeNode * else_node;
+	struct TreeNode * exp;
+	struct Token * next = pt;
+
+	set_node_as_deepest(node);
+	set_node_as_deepest(if_node);
+	if (
+		(pt = next, 
+		remove_as_child(node), 
+		expression_error = false, 1) &&
+		_Match("IF_KEYWORD", false) && 
+		_Match("OPEN_PARENTHESIS", false) &&
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+		_Match("CLOSE_PARENTHESIS", false) &&
+		Statement() &&
+		_Match("ELSE_KEYWORD", false)
+	){
+		set_node_as_child(node, if_node);
+		else_node = create_node("ELSE_CONDITIONAL", "ELSE_CONDITIONAL");
+		set_node_as_child(node, else_node);
+
+		set_node_as_deepest(else_node);
+		Statement();
+		remove_node_from_deepest();	
+
+		next = pt;
+	}
+	else if (
+		(pt = next, 
+		remove_as_child(node), 
+		expression_error = false, 1) &&
+		_Match("IF_KEYWORD", false) && 
+		_Match("OPEN_PARENTHESIS", false) &&
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+		_Match("CLOSE_PARENTHESIS", false) &&
+		Statement()
+	){
+		set_node_as_child(node, if_node);
+		next = pt;
+	}
+	else {
+		set_error();
+		expression_error = true;
+	}
+
+	remove_node_from_deepest();	
+	remove_node_from_deepest();
+
+	return node;
 }
 
 
@@ -399,14 +493,17 @@ struct TreeNode * Factor(){
 	return node;
 }
 
- struct TreeNode * Declaration_Statement(){
-	print_if_explicit("Declaration_Statement\n");
-	struct TreeNode * node = create_node("DECLARATION_STATEMENT", "DECLARATION_STATEMENT");
+bool Declaration(){
+	print_if_explicit("Declaration\n");
+	struct TreeNode * node = create_node("DECLARATION", "DECLARATION");
 	struct TreeNode * exp;
 	struct TreeNode * assignement_op_node;
 	struct TreeNode * assignement_node;
 	struct TreeNode * int_keyword;
 	struct TreeNode * var_node;
+	bool match = true;
+
+	set_as_child(node); 
 	set_node_as_deepest(node);
 
 
@@ -432,15 +529,17 @@ struct TreeNode * Factor(){
 		}
 		else if (cmpstr(pt->type, "COMA")) {
 			printf("COMA IS NOT SUPPORTED!\n");
+			match = false;
+			set_error();
 		}
 	} else {
-		expression_error = true;
+		match = false;
 		set_error();
 	}
 
 	remove_node_from_deepest();
 
-	return node;
+	return match;
 } 
 
 bool Assignement_Expression(){
@@ -606,11 +705,16 @@ bool Identifier(){
 
 bool Match(char *type){
 	print_if_explicit("Match\n");
+	return _Match(type, true);
+}
+
+bool _Match(char *type, bool set_child){
+	print_if_explicit("_Match\n");
 	if(SILENT_ARG == false)
 		printf("\tMatch: SOURCE_CODE_POINTER: '%s'\n\tPARSER_NODE: '%s'\n", pt->type, type);
 	if(pt->type && cmpstr(pt->type, type)){
 		struct TreeNode * node = create_node(pt->type, pt->value.string);
- 		set_as_child(node);
+ 		if(set_child) set_as_child(node);
 		pt++;
 		return true;
 	}
