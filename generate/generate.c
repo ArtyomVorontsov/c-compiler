@@ -9,7 +9,6 @@ struct VarEntity {
 };
 struct VarEntity * var_map[100];
 int registered_var_amount = 0;
-
 void generate(struct TreeNode * root_node){
 	generate_program(root_node->children[0]);
 }
@@ -35,7 +34,7 @@ void generate_function(struct TreeNode * node){
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", identifier_value);
 	generate_prologue();
-	generate_multi_statement(statement_node);
+	generate_function_body(statement_node);
 	generate_epilogue();
 }
 
@@ -54,16 +53,16 @@ void generate_epilogue(){
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "ret\n");
 }
 
-void generate_multi_statement(struct TreeNode * node){
-	print_if_explicit("generate_multi_statement\n");
+void generate_function_body(struct TreeNode * node){
+	print_if_explicit("generate_function_body\n");
 	struct TreeNode * child_node;
 
 	if(node->children_amount > 0){
 		for(int i = 0; i < node->children_amount; i++){
 			child_node = node->children[i];
 		
-			if(strcmp(child_node->type, "STATEMENT") == 0) {
-				generate_statement(child_node);
+			if(strcmp(child_node->type, "BLOCK_ITEM") == 0) {
+				generate_block_item(child_node);
 			} 
 			else {
 				if(SILENT_ARG != true)
@@ -75,6 +74,18 @@ void generate_multi_statement(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
 	}
+}
+void generate_block_item(struct TreeNode * node){
+	print_if_explicit("generate_block_item\n");
+	struct TreeNode * child_node = node->children[0];
+
+
+	if(strcmp(child_node->type, "STATEMENT") == 0) {
+		generate_statement(child_node);
+	} 
+	else if(strcmp(child_node->type, "CONDITIONAL_STATEMENT") == 0) {
+		// TODO add handler
+	} 
 }
 
 void generate_statement(struct TreeNode * node){
@@ -177,6 +188,9 @@ void generate_expression(struct TreeNode * node){
 	struct TreeNode * child_node = node->children[0];
 
 	if(strcmp(child_node->type, "EXPRESSION") == 0) {
+		generate_expression(child_node);
+	}
+	else if(strcmp(child_node->type, "CONDITIONAL_EXPRESSION") == 0) {
 		generate_expression(child_node);
 	}
 	else if(strcmp(child_node->type, "LOGICAL_OR_EXPRESSION") == 0) {

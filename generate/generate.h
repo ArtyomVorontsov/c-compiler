@@ -1,8 +1,9 @@
 #include "../compiler.h"
 void generate_program(struct TreeNode * node);
 void generate_function(struct TreeNode * node);
+void generate_function_body(struct TreeNode * node);
+void generate_block_item(struct TreeNode * node);
 void generate_statement(struct TreeNode * node);
-void generate_multi_statement(struct TreeNode * node);
 void generate_expression(struct TreeNode * node);
 void generate_binary_op(struct TreeNode * node);
 void generate_binary_statement( struct TreeNode * node, char * operator_type );
