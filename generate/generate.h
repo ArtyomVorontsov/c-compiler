@@ -20,6 +20,7 @@ void generate_less_than_statement(struct TreeNode * operand1, struct TreeNode * 
 void generate_less_than_or_equal_statement(struct TreeNode * operand1, struct TreeNode * operand2);
 void generate_greater_than_statement(struct TreeNode * operand1, struct TreeNode * operand2);
 void generate_greater_than_or_equal_statement(struct TreeNode * operand1, struct TreeNode * operand2);
+void generate_conditional_expression(struct TreeNode * node);
 void generate_assignement_expression(struct TreeNode * node);
 void generate_unary_op(struct TreeNode * node);
 void generate_term(struct TreeNode * node);

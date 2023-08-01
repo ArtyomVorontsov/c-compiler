@@ -195,16 +195,16 @@ void generate_conditional_statement(struct TreeNode * node){
 	char * end_label = generate_unique_label("_end");
 	
 	if(strcmp(condition_node->type, "CONDITION") == 0) {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# CONDITION\n");
 		generate_expression(condition_node->children[0]);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "je %s\n", false_label);
 
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# TRUE CONDITION\n");
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", true_label);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "je %s\n", false_label);
-
 		generate_statement(true_condition_node->children[0]);
-
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", end_label);
 
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
@@ -228,7 +228,10 @@ void generate_expression(struct TreeNode * node){
 	if(strcmp(child_node->type, "EXPRESSION") == 0) {
 		generate_expression(child_node);
 	}
-	else if(strcmp(child_node->type, "CONDITIONAL_EXPRESSION") == 0) {
+	else if((strcmp(child_node->type, "CONDITIONAL_EXPRESSION") == 0) && child_node->children_amount == 3) {
+		generate_conditional_expression(child_node);
+	}
+	else if((strcmp(child_node->type, "CONDITIONAL_EXPRESSION") == 0) && child_node->children_amount == 1) {
 		generate_expression(child_node);
 	}
 	else if(strcmp(child_node->type, "LOGICAL_OR_EXPRESSION") == 0) {
@@ -261,6 +264,38 @@ void generate_expression(struct TreeNode * node){
 	else {
 		if(SILENT_ARG != true)
 			printf("No handler\n");
+	}
+}
+
+void generate_conditional_expression(struct TreeNode * node){
+	print_if_explicit("generate_conditional_expression\n");
+	struct TreeNode * condition_node = node->children[0];
+	struct TreeNode * true_condition_node = node->children[1];
+	struct TreeNode * false_condition_node = node->children[2];
+
+	char * true_label = generate_unique_label("_true");
+	char * false_label = generate_unique_label("_false");
+	char * end_label = generate_unique_label("_end");
+	
+	if(strcmp(condition_node->type, "CONDITION") == 0) {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# CONDITION\n");
+		generate_expression(condition_node->children[0]);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "je %s\n", false_label);
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# TRUE CONDITION\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", true_label);
+		generate_expression(true_condition_node->children[0]);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", end_label);
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# FALSE CONDITION\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", false_label);
+
+		generate_expression(false_condition_node->children[0]);
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", end_label);
 	}
 }
 
