@@ -293,7 +293,7 @@ void generate_conditional_expression(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# FALSE CONDITION\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", false_label);
 
-		generate_expression(false_condition_node->children[0]);
+		generate_expression(false_condition_node);
 
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", end_label);
 	}
