@@ -78,6 +78,12 @@ bool Block_Item(){
 	struct TreeNode * exp;
 	struct Token * next = pt;
 
+	// Skip semicolon nodes
+	if(_Match("SEMICOLON", false)){
+		match = true;
+		return match;
+	}
+
  	set_as_child(node);
 	set_node_as_deepest(node);
 
@@ -112,6 +118,7 @@ bool Function_Body(){
 	while(Block_Item()){
 		next = pt;
 		match = true;
+
 		if(i++ > 1000){
 			printf("Error: expressions amount exceeded 999!\n");
 			set_error();
@@ -157,17 +164,6 @@ bool Statement(){
 	){
 		match = true;
 	}
-	/*
-	else if (
-		(pt = next, 
-		remove_node_as_child(node), 
-		expression_error = false, 1) &&
-		(exp = Declaration_Statement(), set_node_as_child(node, exp), expression_error == false) && 
-		Match("SEMICOLON")
-	){
-		match = true;
-	} 
-	*/
 	else if (
 		(pt = next, 
 		remove_node_as_child(node), 
@@ -191,30 +187,32 @@ bool Statement(){
 
 struct TreeNode * Conditional(){
 	print_if_explicit("Conditional\n");
-	struct TreeNode * node = create_node("CONDITIONAL", "CONDITIONAL");
-	struct TreeNode * if_node = create_node("IF_CONDITIONAL", "IF_CONDITIONAL");
-	struct TreeNode * else_node;
+	struct TreeNode * node = create_node("CONDITIONAL_STATEMENT", "CONDITIONAL_STATEMENT");
+	struct TreeNode * condition_node = create_node("CONDITION", "CONDITION");
+	struct TreeNode * true_condition_node = create_node("TRUE_CONDITION", "TRUE_CONDITION");
+	struct TreeNode * false_condition_node = create_node("FALSE_CONDITION", "FALSE_CONDITION");
 	struct TreeNode * exp;
 	struct Token * next = pt;
 
 	set_node_as_deepest(node);
-	set_node_as_deepest(if_node);
+	set_node_as_child(node, condition_node);
+	set_node_as_deepest(true_condition_node);
 	if (
 		(pt = next, 
-		remove_as_child(node), 
+		remove_node_as_child(condition_node), 
+		remove_node_as_child(true_condition_node), 
 		expression_error = false, 1) &&
 		_Match("IF_KEYWORD", false) && 
 		_Match("OPEN_PARENTHESIS", false) &&
-		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+		(exp = Expression(), set_node_as_child(condition_node, exp), expression_error == false) && 
 		_Match("CLOSE_PARENTHESIS", false) &&
 		Statement() &&
 		_Match("ELSE_KEYWORD", false)
 	){
-		set_node_as_child(node, if_node);
-		else_node = create_node("ELSE_CONDITIONAL", "ELSE_CONDITIONAL");
-		set_node_as_child(node, else_node);
+		set_node_as_child(node, true_condition_node);
+		set_node_as_child(node, false_condition_node);
 
-		set_node_as_deepest(else_node);
+		set_node_as_deepest(false_condition_node);
 		Statement();
 		remove_node_from_deepest();	
 
@@ -222,15 +220,16 @@ struct TreeNode * Conditional(){
 	}
 	else if (
 		(pt = next, 
-		remove_as_child(node), 
+		remove_node_as_child(condition_node), 
+		remove_node_as_child(true_condition_node), 
 		expression_error = false, 1) &&
 		_Match("IF_KEYWORD", false) && 
 		_Match("OPEN_PARENTHESIS", false) &&
-		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
+		(exp = Expression(), set_node_as_child(condition_node, exp), expression_error == false) && 
 		_Match("CLOSE_PARENTHESIS", false) &&
 		Statement()
 	){
-		set_node_as_child(node, if_node);
+		set_node_as_child(node, true_condition_node);
 		next = pt;
 	}
 	else {
@@ -243,6 +242,7 @@ struct TreeNode * Conditional(){
 
 	return node;
 }
+
 
 
 struct TreeNode * Expression(){
@@ -259,12 +259,12 @@ struct TreeNode * Expression(){
 		next = pt;
 	} 
 	else if(pt = next, remove_as_child(), 1){
-		term_node = Logical_And_Expression();
+		term_node = Conditional_Expression();
 		set_node_as_child(node, term_node); 
 
 		while(pt->type && compare_operator_by_precedence_level(0)){
 			bin_op_node = Binary_OP();
-			next_term_node = Logical_And_Expression();
+			next_term_node = Conditional_Expression();
 
 			term_node = Binary_Statement(bin_op_node, term_node, next_term_node);
 			remove_node_as_child(node);
@@ -273,6 +273,51 @@ struct TreeNode * Expression(){
 	}
 	
 	remove_node_from_deepest();	
+	return node;
+}
+
+struct TreeNode * Conditional_Expression(){
+	print_if_explicit("Conditional_Expression\n");
+
+	struct TreeNode * node = create_node("CONDITIONAL_EXPRESSION", "CONDITIONAL_EXPRESSION");
+	struct TreeNode * condition_node = create_node("CONDITION", "CONDITION");
+	struct TreeNode * true_condition_node = create_node("TRUE_CONDITION", "TRUE_CONDITION");
+	struct TreeNode * false_condition_node = create_node("FALSE_CONDITION", "FALSE_CONDITION");
+	struct TreeNode * exp;
+
+	set_node_as_deepest(node);
+
+	exp = Logical_Or_Expression();
+	set_node_as_child(node, exp); 
+
+	if(pt->type && compare_operator_by_precedence_level(0)){
+		remove_as_child();
+
+		set_node_as_child(condition_node, exp); 
+
+		set_node_as_child(node, condition_node); 
+		set_node_as_child(node, true_condition_node); 
+		set_node_as_child(node, false_condition_node); 
+
+		if(_Match("QUESTION_MARK_OP", false)) {
+			exp = Expression();
+			set_node_as_child(true_condition_node, exp); 
+
+			if(_Match("COLON_OP", false)) {
+				exp = Conditional_Expression();
+				set_node_as_child(false_condition_node, exp);
+			} else {
+				expression_error = true;
+				set_error();
+			}
+		} else {
+			expression_error = true;
+			set_error();
+		}
+	}
+
+	remove_node_from_deepest();	
+	
 	return node;
 }
 
@@ -287,7 +332,7 @@ struct TreeNode * Logical_Or_Expression(){
 	term_node = Logical_And_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(pt->type && compare_operator_by_precedence_level(0)){
+	while(pt->type && compare_operator_by_precedence_level(1)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Logical_And_Expression();
 
@@ -312,7 +357,7 @@ struct TreeNode * Logical_And_Expression(){
 	term_node = Equality_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(pt->type && compare_operator_by_precedence_level(1)){
+	while(pt->type && compare_operator_by_precedence_level(2)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Equality_Expression();
 
@@ -337,7 +382,7 @@ struct TreeNode * Equality_Expression(){
 	term_node = Relational_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(pt->type && compare_operator_by_precedence_level(2)){
+	while(pt->type && compare_operator_by_precedence_level(3)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Relational_Expression();
 
@@ -362,7 +407,7 @@ struct TreeNode * Relational_Expression(){
 	term_node = Addictive_Expression();
 	set_node_as_child(node, term_node); 
 
-	while(pt->type && compare_operator_by_precedence_level(3)){
+	while(pt->type && compare_operator_by_precedence_level(4)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Addictive_Expression();
 
@@ -387,7 +432,7 @@ struct TreeNode * Addictive_Expression(){
 	term_node = Term();
 	set_node_as_child(node, term_node); 
 
-	while(pt->type && compare_operator_by_precedence_level(4)){
+	while(pt->type && compare_operator_by_precedence_level(5)){
 		bin_op_node = Binary_OP(pt);
 		next_term_node = Term();
 
@@ -414,7 +459,7 @@ struct TreeNode * Term(){
 	set_node_as_child(node, factor_node);
 
 
-	while(pt->type && compare_operator_by_precedence_level(5)){
+	while(pt->type && compare_operator_by_precedence_level(6)){
 		op_node = Binary_OP(pt);
 		next_factor_node = Factor(pt + 1);
 
@@ -434,6 +479,7 @@ struct TreeNode * Factor(){
 	struct TreeNode * node = create_node("FACTOR", "FACTOR");
 	struct TreeNode * int_node;
 	struct TreeNode * var_node;
+	struct TreeNode * semicolon_node;
 	struct TreeNode * assignement_node;
 	struct TreeNode * exp_node;
 	struct TreeNode * op_node;
@@ -441,6 +487,7 @@ struct TreeNode * Factor(){
 	struct Token * next = pt;
 
 	set_node_as_deepest(node);
+
 	if (pt->type && (cmpstr(pt->type, "OPEN_PARENTHESIS"))){
 		print_if_explicit("Expression in parenthesis\n");
 		pt++;
@@ -474,6 +521,8 @@ struct TreeNode * Factor(){
 		next = pt;
 	}
 	else if ((pt = next, remove_as_child(), pt->type) && cmpstr(pt->type, "SEMICOLON")){
+		semicolon_node = create_node("SEMICOLON", "SEMICOLON");
+		set_node_as_child(node, semicolon_node);
 		next = pt;
 	} 
 	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER"))){
@@ -727,7 +776,9 @@ bool _Match(char *type, bool set_child){
 bool compare_operator_by_precedence_level(int level){
 	switch(level){
 		case 0:
-			return cmpstr(pt->type, "OR_OP") ||
+			return cmpstr(pt->type, "QUESTION_MARK_OP") ||
+
+			cmpstr(pt->type, "OR_OP") ||
 
 			cmpstr(pt->type, "AND_OP") ||
 
@@ -746,7 +797,9 @@ bool compare_operator_by_precedence_level(int level){
 			cmpstr(pt->type, "DIVISION_OP");
 
 		case 1:
-			return cmpstr(pt->type, "AND_OP") ||
+			return cmpstr(pt->type, "OR_OP") ||
+
+			cmpstr(pt->type, "AND_OP") ||
 
 			cmpstr(pt->type, "EQUAL_OP") ||
 			cmpstr(pt->type, "NOT_EQUAL_OP") ||
@@ -763,7 +816,9 @@ bool compare_operator_by_precedence_level(int level){
 			cmpstr(pt->type, "DIVISION_OP");
 
 		case 2:
-			return cmpstr(pt->type, "EQUAL_OP") ||
+			return cmpstr(pt->type, "AND_OP") ||
+
+			cmpstr(pt->type, "EQUAL_OP") ||
 			cmpstr(pt->type, "NOT_EQUAL_OP") ||
 
 			cmpstr(pt->type, "LESS_THAN_OP") ||
@@ -778,7 +833,10 @@ bool compare_operator_by_precedence_level(int level){
 			cmpstr(pt->type, "DIVISION_OP");
 
 		case 3:
-			return cmpstr(pt->type, "LESS_THAN_OP") ||
+			return cmpstr(pt->type, "EQUAL_OP") ||
+			cmpstr(pt->type, "NOT_EQUAL_OP") ||
+
+			cmpstr(pt->type, "LESS_THAN_OP") ||
 			cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
 			cmpstr(pt->type, "GREATER_THAN_OP") ||
 			cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
@@ -790,13 +848,25 @@ bool compare_operator_by_precedence_level(int level){
 			cmpstr(pt->type, "DIVISION_OP");
 
 		case 4:
-			return cmpstr(pt->type, "ADDITION_OP") ||
+			return cmpstr(pt->type, "LESS_THAN_OP") ||
+			cmpstr(pt->type, "LESS_THAN_OR_EQUAL_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OP") ||
+			cmpstr(pt->type, "GREATER_THAN_OR_EQUAL_OP") ||
+
+			cmpstr(pt->type, "ADDITION_OP") ||
 			cmpstr(pt->type, "NEGATION_OP") ||
 
 			cmpstr(pt->type, "MULTIPLICATION_OP") ||
 			cmpstr(pt->type, "DIVISION_OP");
 
 		case 5:
+			return cmpstr(pt->type, "ADDITION_OP") ||
+			cmpstr(pt->type, "NEGATION_OP") ||
+
+			cmpstr(pt->type, "MULTIPLICATION_OP") ||
+			cmpstr(pt->type, "DIVISION_OP");
+
+		case 6:
 			return cmpstr(pt->type, "MULTIPLICATION_OP") ||
 			cmpstr(pt->type, "DIVISION_OP");
 
