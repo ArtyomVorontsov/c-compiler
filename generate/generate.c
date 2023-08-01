@@ -78,43 +78,17 @@ void generate_function_body(struct TreeNode * node){
 void generate_block_item(struct TreeNode * node){
 	print_if_explicit("generate_block_item\n");
 	struct TreeNode * child_node = node->children[0];
-
+	printf("child_NODE: %s\n", child_node->type);
 
 	if(strcmp(child_node->type, "STATEMENT") == 0) {
 		generate_statement(child_node);
 	} 
-	else if(strcmp(child_node->type, "CONDITIONAL_STATEMENT") == 0) {
-		// TODO add handler
-	} 
-}
-
-void generate_statement(struct TreeNode * node){
-	print_if_explicit("generate_statement\n");
-	struct TreeNode * child_node;
-
-	for(int i = node->children_amount - 1; i > -1; i--){
-		child_node = node->children[i];
-	
-		if(strcmp(child_node->type, "EXPRESSION") == 0) {
-			generate_expression(child_node);
-		} 
-		else if(strcmp(child_node->type, "RETURN_KEYWORD") == 0) {
-			generate_epilogue();
-			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# RETURN\n");	
-			asm_buffer_ptr += sprintf(asm_buffer_ptr, "ret\n");	
-		} 
-		else if(strcmp(child_node->type, "DECLARATION_STATEMENT") == 0) {
-			generate_declaration_statement(child_node);
-		} 
-		else {
-			if(SILENT_ARG != true)
-				printf("No handler\n");
-		}
+	else if(strcmp(child_node->type, "DECLARATION") == 0) {
+		generate_declaration(child_node);
 	}
 }
 
-void generate_declaration_statement(struct TreeNode * node){
+void generate_declaration(struct TreeNode * node){
 	print_if_explicit("generate_declaration_statement\n");
 	struct TreeNode * var_node;
 	struct TreeNode * exp_node;
@@ -180,6 +154,70 @@ void generate_declaration_statement(struct TreeNode * node){
 			printf("ERROR: Variable %s is already declared.\n", var_map[var_index]->name);
 			exit(1);
 		}
+	}
+}
+
+
+void generate_statement(struct TreeNode * node){
+	print_if_explicit("generate_statement\n");
+	struct TreeNode * child_node;
+
+	for(int i = node->children_amount - 1; i > -1; i--){
+		child_node = node->children[i];
+	
+		if(strcmp(child_node->type, "EXPRESSION") == 0) {
+			generate_expression(child_node);
+		} 
+		else if(strcmp(child_node->type, "RETURN_KEYWORD") == 0) {
+			generate_epilogue();
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# RETURN\n");	
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "ret\n");	
+		} 
+		else if(strcmp(child_node->type, "CONDITIONAL_STATEMENT") == 0) {
+			generate_conditional_statement(child_node);
+		} 
+		else {
+			if(SILENT_ARG != true)
+				printf("No handler\n");
+		}
+	}
+}
+
+void generate_conditional_statement(struct TreeNode * node){
+	print_if_explicit("generate_conditional_statement\n");
+	struct TreeNode * condition_node = node->children[0];
+	struct TreeNode * true_condition_node = node->children[1];
+	struct TreeNode * false_condition_node;
+
+	char * true_label = generate_unique_label("_true");
+	char * false_label = generate_unique_label("_false");
+	char * end_label = generate_unique_label("_end");
+	
+	if(strcmp(condition_node->type, "CONDITION") == 0) {
+		generate_expression(condition_node->children[0]);
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# TRUE CONDITION\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", true_label);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "je %s\n", false_label);
+
+		generate_statement(true_condition_node->children[0]);
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", end_label);
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# FALSE CONDITION\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", false_label);
+
+
+		if(node->children_amount == 3){
+			false_condition_node = node->children[2];
+			generate_statement(false_condition_node->children[0]);
+		}
+
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", end_label);
 	}
 }
 

@@ -6,6 +6,7 @@ void generate_block_item(struct TreeNode * node);
 void generate_statement(struct TreeNode * node);
 void generate_expression(struct TreeNode * node);
 void generate_binary_op(struct TreeNode * node);
+void generate_conditional_statement(struct TreeNode * node);
 void generate_binary_statement( struct TreeNode * node, char * operator_type );
 void generate_addition_statement(struct TreeNode * operand1, struct TreeNode * operand2);
 void generate_substraction_statement(struct TreeNode * operand1, struct TreeNode * operand2);
@@ -29,7 +30,7 @@ void generate_prologue();
 void generate_epilogue();
 void generate_operand(struct TreeNode * node);
 char * generate_unique_label(char * l);
-void generate_declaration_statement(struct TreeNode * node);
+void generate_declaration(struct TreeNode * node);
 
 void register_var(char * name);
 struct VarEntity * create_var_enity(char * name, int offset);
