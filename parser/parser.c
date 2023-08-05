@@ -91,11 +91,10 @@ bool Block_Item(){
 		match = true;
 	}
 	else if (
-		pt = next, remove_node_as_child(node), Declaration()
+		pt = next, remove_node_as_child(node), Declaration() && _Match("SEMICOLON", false)
 	){
 		match = true;
 	} 
-
 
 	remove_node_from_deepest();	
 
@@ -151,7 +150,7 @@ bool Statement(){
 		expression_error = false, 1) &&
 		Match("RETURN_KEYWORD") && 
 		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
-		Match("SEMICOLON")
+		_Match("SEMICOLON", false)
 	){
 		match = true;
 	} 
@@ -160,7 +159,7 @@ bool Statement(){
 		remove_node_as_child(node), 
 		expression_error = false, 1) &&
 		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
-		Match("SEMICOLON")
+		_Match("SEMICOLON", false)
 	){
 		match = true;
 	}
@@ -169,6 +168,17 @@ bool Statement(){
 		remove_node_as_child(node), 
 		expression_error = false, 1) &&
 		(exp = Conditional(), set_node_as_child(node, exp), expression_error == false)
+	){
+
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		_Match("OPEN_BRACE", false) &&
+		(exp = Compound(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("CLOSE_BRACE", false)
 	){
 		match = true;
 	}
@@ -183,6 +193,35 @@ bool Statement(){
 
 	set_error();
 	return false;
+}
+
+struct TreeNode * Compound(){
+	print_if_explicit("Compound\n");
+	bool match = false;
+	int i = 0;
+	struct Token * next = pt;
+	struct TreeNode * node = create_node("COMPOUND", "COMPOUND");
+
+	set_node_as_deepest(node);
+
+	while(Block_Item()){
+		next = pt;
+		match = true;
+
+		if(i++ > 1000){
+			printf("Error: expressions amount exceeded 999!\n");
+			set_error();
+			return false;
+		}
+	}
+
+	// Recover after unsuccessfull statement match
+	pt = next;
+	node->children_amount--;
+
+	remove_node_from_deepest();
+
+	return node;
 }
 
 struct TreeNode * Conditional(){
@@ -520,9 +559,7 @@ struct TreeNode * Factor(){
 		set_node_as_child(node, int_node);
 		next = pt;
 	}
-	else if ((pt = next, remove_as_child(), pt->type) && cmpstr(pt->type, "SEMICOLON")){
-		semicolon_node = create_node("SEMICOLON", "SEMICOLON");
-		set_node_as_child(node, semicolon_node);
+	else if ((pt = next, remove_as_child(), pt->type) && _Match("SEMICOLON", false)){
 		next = pt;
 	} 
 	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER"))){

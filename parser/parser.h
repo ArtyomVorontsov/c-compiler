@@ -19,6 +19,7 @@ struct TreeNode * Factor();
 struct TreeNode * Binary_Statement(struct TreeNode * op_node, struct TreeNode * term_node, struct TreeNode * next_term_node);
 struct TreeNode * Unary_Statement();
 struct TreeNode * Conditional();
+struct TreeNode * Compound();
 bool Type();
 bool Identifier();
 struct TreeNode * Var();
