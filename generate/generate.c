@@ -75,6 +75,30 @@ void generate_function_body(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
 	}
 }
+
+void generate_compound(struct TreeNode * node){
+	print_if_explicit("generate_compound\n");
+	struct TreeNode * child_node;
+
+	if(node->children_amount > 0){
+		for(int i = 0; i < node->children_amount; i++){
+			child_node = node->children[i];
+		
+			if(strcmp(child_node->type, "BLOCK_ITEM") == 0) {
+				generate_block_item(child_node);
+			} 
+			else {
+				if(SILENT_ARG != true)
+					printf("No handler\n");
+			}
+		}
+	} else {
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# NO RETURN STATEMENT\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
+	}
+}
+
 void generate_block_item(struct TreeNode * node){
 	print_if_explicit("generate_block_item\n");
 	struct TreeNode * child_node = node->children[0];
@@ -177,6 +201,9 @@ void generate_statement(struct TreeNode * node){
 		else if(strcmp(child_node->type, "CONDITIONAL_STATEMENT") == 0) {
 			generate_conditional_statement(child_node);
 		} 
+		else if(strcmp(child_node->type, "COMPOUND") == 0) {
+			generate_compound(child_node);
+		}
 		else {
 			if(SILENT_ARG != true)
 				printf("No handler\n");
