@@ -36,7 +36,13 @@ void generate_declaration(struct TreeNode * node);
 
 void register_var(char * name);
 struct VarEntity * create_var_enity(char * name, int offset);
-int find_var_index_by_name(char * name);
-int find_var_index_by_name_with_error(char * name);
+//int find_var_index_by_name(char * name);
+//int find_var_index_by_name_with_error(char * name);
 void unregister_var_by_name(char * name);
+struct VarEntity * get_var_by_name(char * name);
+struct VarEntity * get_var_by_name_in_current_scope(char * name);
+struct VarEntity * get_var_by_name_with_error(char * name);
+void enter_scope();
+void exit_scope();
+void create_var_map();
 
