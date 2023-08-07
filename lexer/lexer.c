@@ -184,6 +184,91 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* FOR_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_FOR_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "FOR_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* WHILE_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_WHILE_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "WHILE_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* DO_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_DO_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "DO_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* BREAK_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_BREAK_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "BREAK_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
+		/* CONTINUE_KEYWORD */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_CONTINUE_KEYWORD_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "CONTINUE_KEYWORD";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* OPERATORS */
 
 		/* NEGATION */
@@ -1127,6 +1212,265 @@ char * machine_QUESTION_MARK_OP_FA(char *p) {
 	switch (*p){
 		case '?': 
 			return p + 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+/* LOOPS */
+char * machine_FOR_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'f': 
+			return machine_step2_FOR_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_FOR_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'o': 
+			return machine_step3_FOR_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_FOR_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'r': 
+			return machine_step4_FOR_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step4_FOR_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ' ': 
+		case '(': 
+		case '\t': 
+			return p - 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_WHILE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'w': 
+			return machine_step2_WHILE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_WHILE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'h': 
+			return machine_step3_WHILE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_WHILE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'i': 
+			return machine_step4_WHILE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step4_WHILE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'l': 
+			return machine_step5_WHILE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step5_WHILE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'e': 
+			return machine_step6_WHILE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step6_WHILE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ' ': 
+		case '(': 
+		case '\t': 
+			return p - 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_DO_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'd': 
+			return machine_step2_DO_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_DO_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'o': 
+			return machine_step3_DO_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_DO_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ' ': 
+		case '{': 
+		case '\t': 
+			return p - 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_BREAK_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'b': 
+			return machine_step2_BREAK_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_BREAK_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'r': 
+			return machine_step3_BREAK_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_BREAK_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'e': 
+			return machine_step4_BREAK_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step4_BREAK_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'a': 
+			return machine_step5_BREAK_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step5_BREAK_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'k': 
+			return machine_step6_BREAK_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step6_BREAK_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ';': 
+			return p - 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'c': 
+			return machine_step2_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step2_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'o': 
+			return machine_step3_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step3_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'n': 
+			return machine_step4_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step4_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 't': 
+			return machine_step5_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step5_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'i': 
+			return machine_step6_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step6_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'n': 
+			return machine_step7_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step7_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'u': 
+			return machine_step8_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step8_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case 'e': 
+			return machine_step9_CONTINUE_KEYWORD_FA(p + 1);
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_step9_CONTINUE_KEYWORD_FA(char *p) {
+	switch (*p){
+		case ';': 
+			return p - 1;
 		default:
 			return (void *) FA_FAILED;
 	}	

@@ -67,6 +67,40 @@ char * machine_step5_ELSE_KEYWORD_FA(char *p);
 char * machine_COLON_OP_FA(char *p);
 char * machine_QUESTION_MARK_OP_FA(char *p);
 
+/* LOOPS */
+char * machine_FOR_KEYWORD_FA(char *p);
+char * machine_step2_FOR_KEYWORD_FA(char *p);
+char * machine_step3_FOR_KEYWORD_FA(char *p);
+char * machine_step4_FOR_KEYWORD_FA(char *p);
+
+char * machine_WHILE_KEYWORD_FA(char *p);
+char * machine_step2_WHILE_KEYWORD_FA(char *p);
+char * machine_step3_WHILE_KEYWORD_FA(char *p);
+char * machine_step4_WHILE_KEYWORD_FA(char *p);
+char * machine_step5_WHILE_KEYWORD_FA(char *p);
+char * machine_step6_WHILE_KEYWORD_FA(char *p);
+
+char * machine_DO_KEYWORD_FA(char *p);
+char * machine_step2_DO_KEYWORD_FA(char *p);
+char * machine_step3_DO_KEYWORD_FA(char *p);
+
+char * machine_BREAK_KEYWORD_FA(char *p);
+char * machine_step2_BREAK_KEYWORD_FA(char *p);
+char * machine_step3_BREAK_KEYWORD_FA(char *p);
+char * machine_step4_BREAK_KEYWORD_FA(char *p);
+char * machine_step5_BREAK_KEYWORD_FA(char *p);
+char * machine_step6_BREAK_KEYWORD_FA(char *p);
+
+char * machine_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step2_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step3_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step4_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step5_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step6_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step7_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step8_CONTINUE_KEYWORD_FA(char *p);
+char * machine_step9_CONTINUE_KEYWORD_FA(char *p);
+
 /* UTILS */
 void cpy_str(char *from, char *to, char *buff, int buff_size);
 void set_new_line(char *p);
