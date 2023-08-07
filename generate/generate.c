@@ -748,6 +748,12 @@ void enter_scope(){
 void exit_scope(){
 	print_if_explicit("exit_scope\n");
 
+	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# DEALLOCATE VARIABLES\n");	
+	for(int i = 0; i < registered_var_amount[scope_depth] - registered_var_amount[scope_depth - 1]; i++)
+		stack_pop();
+
 	// Dealocate variables
 	registered_var_amount[scope_depth] = 0;
 	scope_depth--;
