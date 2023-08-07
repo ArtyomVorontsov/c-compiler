@@ -751,8 +751,7 @@ void exit_scope(){
 	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# DEALLOCATE VARIABLES\n");	
-	for(int i = 0; i < registered_var_amount[scope_depth] - registered_var_amount[scope_depth - 1]; i++)
-		stack_pop();
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl $%d, %%esp\n", (registered_var_amount[scope_depth] - registered_var_amount[scope_depth - 1]) * 4);	
 
 	// Dealocate variables
 	registered_var_amount[scope_depth] = 0;
@@ -774,7 +773,6 @@ struct VarEntity * get_var_by_name_with_error(char * name) {
 	return var;
 }
 
-// TODO: rewrite to get_var_by_name(), return var structure instead of index;
 struct VarEntity * get_var_by_name(char * name){
 	print_if_explicit("get_var_by_name\n");
 
