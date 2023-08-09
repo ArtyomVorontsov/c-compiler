@@ -182,6 +182,47 @@ bool Statement(){
 	){
 		match = true;
 	}
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("SEMICOLON", false)
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		Match("FOR_KEYWORD") &&
+		_Match("OPEN_PARENTHESIS", false) &&
+		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("SEMICOLON", false) &&
+		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("SEMICOLON", false) &&
+		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("CLOSE_PARENTHESIS", false) &&
+		Statement()
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		Match("FOR_KEYWORD") &&
+		_Match("OPEN_PARENTHESIS", false) &&
+		Declaration() &&
+		_Match("SEMICOLON", false) &&
+		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("SEMICOLON", false) &&
+		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("CLOSE_PARENTHESIS", false) &&
+		Statement()
+	){
+		match = true;
+	}
 	else {
 		pt = next;
 		remove_node_as_child(node);
@@ -283,6 +324,38 @@ struct TreeNode * Conditional(){
 }
 
 
+struct TreeNode * Expression_Option(){
+	print_if_explicit("Expression_Option\n");
+	struct TreeNode * node = create_node("EXPRESSION_OPTION", "EXPRESSION_OPTION");
+	struct TreeNode * non_zero_constant_node;
+	struct TreeNode * exp;
+	struct Token * next = pt;
+
+	set_node_as_deepest(node);
+	
+	if ((pt = next, remove_as_child(), pt->type) && cmpstr(pt->type, "SEMICOLON")){
+		non_zero_constant_node = create_node("NON_ZERO_CONSTANT", "NON_ZERO_CONSTANT");
+		set_as_child(non_zero_constant_node);
+		next = pt;
+	} 
+	else if ((pt = next, remove_as_child(), pt->type) && cmpstr(pt->type, "CLOSE_PARENTHESIS")){
+		non_zero_constant_node = create_node("NON_ZERO_CONSTANT", "NON_ZERO_CONSTANT");
+		set_as_child(non_zero_constant_node);
+		next = pt;
+	} 
+	else if ((pt = next, remove_as_child(), pt->type) && (exp = Expression())){
+		set_as_child(exp);
+		next = pt;
+	} 
+	else {
+		set_error();
+		expression_error = true;
+	}
+
+	remove_node_from_deepest();	
+
+	return node;
+}
 
 struct TreeNode * Expression(){
 	print_if_explicit("Expression\n");
