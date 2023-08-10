@@ -146,7 +146,7 @@ bool Statement(){
 
 	if(
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		Match("RETURN_KEYWORD") && 
 		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
@@ -156,7 +156,7 @@ bool Statement(){
 	} 
 	else if (
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) && 
 		_Match("SEMICOLON", false)
@@ -165,7 +165,7 @@ bool Statement(){
 	}
 	else if (
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		(exp = Conditional(), set_node_as_child(node, exp), expression_error == false)
 	){
@@ -174,7 +174,7 @@ bool Statement(){
 	}
 	else if (
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		_Match("OPEN_BRACE", false) &&
 		(exp = Compound(), set_node_as_child(node, exp), expression_error == false) &&
@@ -184,7 +184,7 @@ bool Statement(){
 	}
 	else if (
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
 		_Match("SEMICOLON", false)
@@ -193,7 +193,7 @@ bool Statement(){
 	}
 	else if (
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		Match("FOR_KEYWORD") &&
 		_Match("OPEN_PARENTHESIS", false) &&
@@ -209,7 +209,7 @@ bool Statement(){
 	}
 	else if (
 		(pt = next, 
-		remove_node_as_child(node), 
+		remove_child_nodes(node), 
 		expression_error = false, 1) &&
 		Match("FOR_KEYWORD") &&
 		_Match("OPEN_PARENTHESIS", false) &&
@@ -220,6 +220,50 @@ bool Statement(){
 		(exp = Expression_Option(), set_node_as_child(node, exp), expression_error == false) &&
 		_Match("CLOSE_PARENTHESIS", false) &&
 		Statement()
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_child_nodes(node), 
+		expression_error = false, 1) &&
+		Match("WHILE_KEYWORD") &&
+		_Match("OPEN_PARENTHESIS", false) &&
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("CLOSE_PARENTHESIS", false) &&
+		Statement()
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_child_nodes(node), 
+		expression_error = false, 1) &&
+		Match("DO_KEYWORD") &&
+		Statement() &&
+		Match("WHILE_KEYWORD") &&
+		_Match("OPEN_PARENTHESIS", false) &&
+		(exp = Expression(), set_node_as_child(node, exp), expression_error == false) &&
+		_Match("CLOSE_PARENTHESIS", false) &&
+		_Match("SEMICOLON", false)
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_child_nodes(node), 
+		expression_error = false, 1) &&
+		Match("BREAK_KEYWORD") &&
+		_Match("SEMICOLON", false)
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		Match("CONTINUE_KEYWORD") &&
+		_Match("SEMICOLON", false)
 	){
 		match = true;
 	}
@@ -1002,6 +1046,10 @@ void set_node_as_child(struct TreeNode * parent_node, struct TreeNode * current_
 void remove_as_child(){
 	struct TreeNode * parent_node = *(pns - 1);
 	// Remove as a child from previous node
+	(*parent_node).children_amount = 0;
+}
+
+void remove_child_nodes(struct TreeNode * parent_node){
 	(*parent_node).children_amount = 0;
 }
 

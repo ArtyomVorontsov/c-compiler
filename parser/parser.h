@@ -34,6 +34,7 @@ bool _Match(char *type, bool set_child);
 bool compare_operator_by_precedence_level(int level);
 void remove_node_from_deepest();
 void set_node_as_deepest(struct TreeNode * current_node);
+void remove_child_nodes(struct TreeNode * parent_node);
 void set_as_child(struct TreeNode * current_node);
 void set_node_as_child(struct TreeNode * parent_node, struct TreeNode * current_node);
 void remove_as_child();
