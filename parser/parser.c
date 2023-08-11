@@ -139,6 +139,7 @@ bool Statement(){
 	bool match = false;
 	struct TreeNode * node = create_node("STATEMENT", "STATEMENT");
 	struct TreeNode * exp;
+	struct TreeNode * loop;
 	struct Token * next = pt;
 
  	set_as_child(node);
@@ -192,6 +193,56 @@ bool Statement(){
 		match = true;
 	}
 	else if (
+		(pt = next, 
+		remove_child_nodes(node), 
+		expression_error = false, 1) &&
+		Loop()
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_child_nodes(node), 
+		expression_error = false, 1) &&
+		Match("BREAK_KEYWORD") &&
+		_Match("SEMICOLON", false)
+	){
+		match = true;
+	}
+	else if (
+		(pt = next, 
+		remove_node_as_child(node), 
+		expression_error = false, 1) &&
+		Match("CONTINUE_KEYWORD") &&
+		_Match("SEMICOLON", false)
+	){
+		match = true;
+	}
+	else {
+		pt = next;
+		remove_node_as_child(node);
+		expression_error = false;
+	}
+	remove_node_from_deepest();	
+
+	if(match) return true;
+
+	set_error();
+	return false;
+}
+
+bool Loop(){
+	print_if_explicit("Statement\n");
+	bool match = false;
+	struct TreeNode * node = create_node("LOOP", "LOOP");
+	struct TreeNode * exp;
+	struct TreeNode * loop;
+	struct Token * next = pt;
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if (
 		(pt = next, 
 		remove_child_nodes(node), 
 		expression_error = false, 1) &&
@@ -249,29 +300,8 @@ bool Statement(){
 	){
 		match = true;
 	}
-	else if (
-		(pt = next, 
-		remove_child_nodes(node), 
-		expression_error = false, 1) &&
-		Match("BREAK_KEYWORD") &&
-		_Match("SEMICOLON", false)
-	){
-		match = true;
-	}
-	else if (
-		(pt = next, 
-		remove_node_as_child(node), 
-		expression_error = false, 1) &&
-		Match("CONTINUE_KEYWORD") &&
-		_Match("SEMICOLON", false)
-	){
-		match = true;
-	}
-	else {
-		pt = next;
-		remove_node_as_child(node);
-		expression_error = false;
-	}
+
+
 	remove_node_from_deepest();	
 
 	if(match) return true;

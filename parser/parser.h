@@ -6,6 +6,7 @@ bool Function();
 bool Statement();
 bool Declaration();
 bool Function_Body();
+bool Loop();
 struct TreeNode * Expression();
 struct TreeNode * Expression_Option();
 struct TreeNode * Conditional_Expression();

@@ -34,10 +34,13 @@ void generate_operand(struct TreeNode * node);
 char * generate_unique_label(char * l);
 void generate_declaration(struct TreeNode * node);
 
+/* LOOPS */
+void generate_loop(struct TreeNode * node);
+void generate_for_loop(struct TreeNode * node);
+void generate_while_loop(struct TreeNode * node);
+
 void register_var(char * name);
 struct VarEntity * create_var_enity(char * name, int offset);
-//int find_var_index_by_name(char * name);
-//int find_var_index_by_name_with_error(char * name);
 void unregister_var_by_name(char * name);
 struct VarEntity * get_var_by_name(char * name);
 struct VarEntity * get_var_by_name_in_current_scope(char * name);
