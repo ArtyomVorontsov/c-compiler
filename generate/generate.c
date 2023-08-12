@@ -222,6 +222,30 @@ void generate_loop(struct TreeNode * node){
 
 void generate_while_loop(struct TreeNode * node){
 	print_if_explicit("generate_while_loop\n");
+
+	struct TreeNode * condition_node = node->children[1];
+	struct TreeNode * statement_node = node->children[2];
+	char * loop_start_label = generate_unique_label("_start");
+	char * loop_end_label = generate_unique_label("_end");
+
+	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_start_label);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP CONDITION\n");
+	generate_expression(condition_node);
+	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP CONDITION CHECK\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "je %s\n", loop_end_label);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP BODY\n");
+	generate_statement(statement_node);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_start_label);
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_end_label);
 }
 
 void generate_for_loop(struct TreeNode * node){
@@ -235,10 +259,7 @@ void generate_for_loop(struct TreeNode * node){
 	char * loop_end_label = generate_unique_label("_end");
 	char * loop_post_expression_label = generate_unique_label("_post_expression");
 
-	printf("TYPEEEE: %s\n", init_node->type);
-
 	if(strcmp(init_node->type, "EXPRESSION_OPTION") == 0) {
-
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP INIT EXPRESSION\n");
 		generate_expression(init_node);
