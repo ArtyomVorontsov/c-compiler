@@ -39,6 +39,7 @@ void generate_loop(struct TreeNode * node);
 void generate_for_loop(struct TreeNode * node);
 void generate_while_loop(struct TreeNode * node);
 void generate_do_while_loop(struct TreeNode * node);
+void generate_break(struct TreeNode * node);
 
 void register_loop(char * loop_start_label, char * loop_end_label);
 char * get_current_loop_start_label();

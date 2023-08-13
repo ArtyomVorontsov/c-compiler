@@ -209,7 +209,7 @@ void generate_statement(struct TreeNode * node){
 			generate_loop(child_node);
 		}
 		else if(strcmp(child_node->type, "BREAK_KEYWORD") == 0) {
-			generate_loop(child_node);
+			generate_break(child_node);
 		}
 		else {
 			if(SILENT_ARG != true)
@@ -217,6 +217,15 @@ void generate_statement(struct TreeNode * node){
 		}
 	}
 }
+void generate_break(struct TreeNode * node){
+	print_if_explicit("generate_break\n");
+	char * loop_end_label = get_current_loop_end_label();
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# BREAK\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_end_label);
+}
+
 void generate_loop(struct TreeNode * node){
 	print_if_explicit("generate_loop\n");
 	struct TreeNode * loop_type_node = node->children[0];
