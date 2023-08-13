@@ -13,6 +13,12 @@ void generate(struct TreeNode * root_node){
 	generate_program(root_node->children[0]);
 }
 int scope_depth = 0;
+int loop_depth = 0;
+struct LoopLabels {
+	char * loop_start;
+	char * loop_end;
+};
+struct LoopLabels * loop_labels[100];
 
 void generate_program(struct TreeNode * node){
 	print_if_explicit("generate_program\n");
@@ -202,6 +208,9 @@ void generate_statement(struct TreeNode * node){
 		else if(strcmp(child_node->type, "LOOP") == 0) {
 			generate_loop(child_node);
 		}
+		else if(strcmp(child_node->type, "BREAK_KEYWORD") == 0) {
+			generate_loop(child_node);
+		}
 		else {
 			if(SILENT_ARG != true)
 				printf("No handler\n");
@@ -211,13 +220,50 @@ void generate_statement(struct TreeNode * node){
 void generate_loop(struct TreeNode * node){
 	print_if_explicit("generate_loop\n");
 	struct TreeNode * loop_type_node = node->children[0];
+
 	if(strcmp(loop_type_node->type, "FOR_KEYWORD") == 0) {
 		generate_for_loop(node);
 	}
 	else if(strcmp(loop_type_node->type, "WHILE_KEYWORD") == 0) {
 		generate_while_loop(node);
 	}
+	else if(strcmp(loop_type_node->type, "DO_KEYWORD") == 0) {
+		generate_do_while_loop(node);
+	}
 
+}
+
+void generate_do_while_loop(struct TreeNode * node){
+	print_if_explicit("generate_do_while_loop\n");
+
+	struct TreeNode * condition_node = node->children[3];
+	struct TreeNode * statement_node = node->children[1];
+	char * loop_start_label = generate_unique_label("_start");
+	char * loop_end_label = generate_unique_label("_end");
+
+	register_loop(loop_start_label, loop_end_label);
+	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_start_label);
+
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP BODY\n");
+	generate_statement(statement_node);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP CONDITION\n");
+	generate_expression(condition_node);
+	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP CONDITION CHECK\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "cmpl $0, %%eax\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "je %s\n", loop_end_label);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_start_label);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_end_label);
+
+	unregister_loop();
 }
 
 void generate_while_loop(struct TreeNode * node){
@@ -228,6 +274,7 @@ void generate_while_loop(struct TreeNode * node){
 	char * loop_start_label = generate_unique_label("_start");
 	char * loop_end_label = generate_unique_label("_end");
 
+	register_loop(loop_start_label, loop_end_label);
 	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_start_label);
 
@@ -246,6 +293,8 @@ void generate_while_loop(struct TreeNode * node){
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_start_label);
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_end_label);
+
+	unregister_loop();
 }
 
 void generate_for_loop(struct TreeNode * node){
@@ -258,6 +307,8 @@ void generate_for_loop(struct TreeNode * node){
 	char * loop_start_label = generate_unique_label("_start");
 	char * loop_end_label = generate_unique_label("_end");
 	char * loop_post_expression_label = generate_unique_label("_post_expression");
+
+	register_loop(loop_start_label, loop_end_label);
 
 	if(strcmp(init_node->type, "EXPRESSION_OPTION") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
@@ -320,6 +371,9 @@ void generate_for_loop(struct TreeNode * node){
 			
 		exit_scope();
 	}
+
+
+	unregister_loop();
 
 }
 
@@ -921,5 +975,28 @@ void unregister_var_by_name(char * name){
 	var->name = "\0";
 	var->offset = -1;
 	registered_var_amount[scope_depth]--;
+}
+
+void register_loop(char * loop_start_label, char * loop_end_label){
+	struct LoopLabels * loop_labels_entity = malloc(sizeof(struct LoopLabels));
+	
+	loop_depth++;
+		
+	loop_labels_entity->loop_start = loop_start_label;
+	loop_labels_entity->loop_end = loop_end_label;
+
+	loop_labels[loop_depth] = loop_labels_entity;
+}
+
+void unregister_loop(){
+	loop_depth--;
+}
+
+char * get_current_loop_start_label(){
+	return loop_labels[loop_depth]->loop_start;
+}
+
+char * get_current_loop_end_label(){
+	return loop_labels[loop_depth]->loop_end;
 }
 
