@@ -685,6 +685,10 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 		case 'z':
 		case '_':
 			return machine_step2_IDENTIFIER_FA(p + 1);
+		case '+':
+		case '-':
+		case '*':
+		case '/':
 		case ' ':
 		case '(':
 		case ')':

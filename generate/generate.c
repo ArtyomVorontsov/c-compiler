@@ -211,6 +211,9 @@ void generate_statement(struct TreeNode * node){
 		else if(strcmp(child_node->type, "BREAK_KEYWORD") == 0) {
 			generate_break(child_node);
 		}
+		else if(strcmp(child_node->type, "CONTINUE_KEYWORD") == 0) {
+			generate_continue(child_node);
+		}
 		else {
 			if(SILENT_ARG != true)
 				printf("No handler\n");
@@ -224,6 +227,15 @@ void generate_break(struct TreeNode * node){
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# BREAK\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_end_label);
+}
+
+void generate_continue(struct TreeNode * node){
+	print_if_explicit("generate_continue\n");
+	char * loop_start_label = get_current_loop_start_label();
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# CONTINUE\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_start_label);
 }
 
 void generate_loop(struct TreeNode * node){
@@ -253,7 +265,6 @@ void generate_do_while_loop(struct TreeNode * node){
 	register_loop(loop_start_label, loop_end_label);
 	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_start_label);
-
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP BODY\n");
@@ -310,14 +321,14 @@ void generate_for_loop(struct TreeNode * node){
 	print_if_explicit("generate_for_loop\n");
 
 	struct TreeNode * init_node  = node->children[1];
-	struct TreeNode * condition_node = node->children[2]->children[0];
-	struct TreeNode * post_expression_node = node->children[3]->children[0];
+	struct TreeNode * condition_node = node->children[2];
+	struct TreeNode * post_expression_node = node->children[3];
 	struct TreeNode * statement_node = node->children[4];
 	char * loop_start_label = generate_unique_label("_start");
 	char * loop_end_label = generate_unique_label("_end");
 	char * loop_post_expression_label = generate_unique_label("_post_expression");
 
-	register_loop(loop_start_label, loop_end_label);
+	register_loop(loop_post_expression_label, loop_end_label);
 
 	if(strcmp(init_node->type, "EXPRESSION_OPTION") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
@@ -339,9 +350,9 @@ void generate_for_loop(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# LOOP BODY\n");
 		generate_statement(statement_node);
 
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_post_expression_label);
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# POST EXPRESSION\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_post_expression_label);
 		generate_expression(post_expression_node);
 
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_start_label);
@@ -373,6 +384,7 @@ void generate_for_loop(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_post_expression_label);
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# POST EXPRESSION\n");
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", loop_post_expression_label);
 		generate_expression(post_expression_node);
 
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "jmp %s\n", loop_start_label);
@@ -430,6 +442,9 @@ void generate_expression(struct TreeNode * node){
 	if(strcmp(child_node->type, "EXPRESSION") == 0) {
 		generate_expression(child_node);
 	}
+	else if(strcmp(child_node->type, "EXPRESSION_OPTION") == 0) {
+		generate_expression(child_node);
+	}
 	else if((strcmp(child_node->type, "CONDITIONAL_EXPRESSION") == 0) && child_node->children_amount == 3) {
 		generate_conditional_expression(child_node);
 	}
@@ -463,11 +478,21 @@ void generate_expression(struct TreeNode * node){
 	else if(strcmp(child_node->type, "ASSIGNEMENT_EXPRESSION") == 0) {
 		generate_assignement_expression(child_node);
 	}
+	else if(strcmp(child_node->type, "NON_ZERO_CONSTANT") == 0){
+		generate_non_zero_constant_expression(child_node);
+	}
 	else {
 		if(SILENT_ARG != true)
 			printf("No handler\n");
 	}
 	print_if_explicit("generate_expression_exit\n");
+}
+
+void generate_non_zero_constant_expression(struct TreeNode * node){
+	print_if_explicit("generate_non_zero_constant_expression\n");
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# NON ZERO CONSTANT\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $1, %%eax\n");
 }
 
 void generate_conditional_expression(struct TreeNode * node){
