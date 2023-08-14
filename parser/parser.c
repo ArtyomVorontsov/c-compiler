@@ -38,14 +38,10 @@ bool Program(){
 
 	set_node_as_deepest(node);
 
-	while(Function()){
+	while(pt->type != 0 && Function()){
 		next = pt;
 		match = true;
 	}
-
-	// Recover after unsuccessfull statement match
-	pt = next;
-	node->children_amount--;
 
 	remove_node_from_deepest();	
 
@@ -59,18 +55,66 @@ bool Function(){
 	print_if_explicit("Function\n");
 	struct TreeNode *node = create_node("FUNCTION", "FUCTION");
 	bool match;
+	struct Token * next = pt;
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+	
+	if(pt = next, remove_node_as_child(node), Function_Definition()){
+		match = true;
+	} 
+	else if(pt = next, remove_node_as_child(node), Function_Declaration()){
+		match = true;
+	}
+
+	remove_node_from_deepest();
+
+	if(match) return true;
+	set_error();
+
+	return false;
+}
+
+bool Function_Definition(){
+	print_if_explicit("Function_Definition\n");
+	bool match = false;
+	struct TreeNode * node = create_node("FUNCTION_DEFINITION", "FUNCTION_DEFINITION");
 
  	set_as_child(node);
 	set_node_as_deepest(node);
 
 	match = Type() && 
 		Identifier() && 
-		Match("OPEN_PARENTHESIS") && 
+		_Match("OPEN_PARENTHESIS", false) && 
 		Function_Params() &&
-		Match("CLOSE_PARENTHESIS") && 
-		Match("OPEN_BRACE") && 
+		_Match("CLOSE_PARENTHESIS", false) && 
+		_Match("OPEN_BRACE", false);
 		Function_Body() && 
-		Match("CLOSE_BRACE");
+		_Match("CLOSE_BRACE", false);
+
+
+	remove_node_from_deepest();
+
+	if(match) return true;
+	set_error();
+
+	return false;
+}
+
+bool Function_Declaration(){
+	print_if_explicit("Function_Declaration\n");
+	bool match = false;
+	struct TreeNode * node = create_node("FUNCTION_DECLARATION", "FUNCTION_DECLARATION");
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	match = Type() && 
+		Identifier() && 
+		_Match("OPEN_PARENTHESIS", false) && 
+		Function_Params() &&
+		_Match("CLOSE_PARENTHESIS", false) && 
+		_Match("SEMICOLON", false);
 
 	remove_node_from_deepest();
 

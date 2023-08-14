@@ -7,6 +7,8 @@ bool Function_Param();
 bool Function_Params();
 bool Function_Argument();
 bool Function_Arguments();
+bool Function_Declaration();
+bool Function_Definition();
 struct TreeNode * Function_Call();
 bool Statement();
 bool Declaration();

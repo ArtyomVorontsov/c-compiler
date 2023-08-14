@@ -34,8 +34,9 @@ void generate_program(struct TreeNode * node){
 
 void generate_function(struct TreeNode * node){
 	print_if_explicit("generate_function\n");
-	char *identifier_value = node->children[1]->value;
-	struct TreeNode * statement_node = node->children[5];
+	struct TreeNode * function_definition = node->children[0];
+	char *identifier_value = function_definition->children[1]->value;
+	struct TreeNode * statement_node = function_definition->children[2];
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);
