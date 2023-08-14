@@ -32,12 +32,20 @@ struct TreeNode * parse(){
 bool Program(){
 	print_if_explicit("Program\n");
 	struct TreeNode *node = create_node("PROGRAM", "PROGRAM");
-	bool match;
+	bool match = false;
+	struct Token * next = pt;
 	struct TreeNode * root_node = nodes_stack[0];
 
 	set_node_as_deepest(node);
 
-	match = Function();
+	while(Function()){
+		next = pt;
+		match = true;
+	}
+
+	// Recover after unsuccessfull statement match
+	pt = next;
+	node->children_amount--;
 
 	remove_node_from_deepest();	
 
@@ -58,6 +66,7 @@ bool Function(){
 	match = Type() && 
 		Identifier() && 
 		Match("OPEN_PARENTHESIS") && 
+		Function_Params() &&
 		Match("CLOSE_PARENTHESIS") && 
 		Match("OPEN_BRACE") && 
 		Function_Body() && 
@@ -69,6 +78,64 @@ bool Function(){
 	set_error();
 
 	return false;
+}
+
+bool Function_Param(){
+	print_if_explicit("Function_Param\n");
+	bool match = false;
+	struct TreeNode * node = create_node("FUNCTION_PARAM", "FUNCTION_PARAM");
+	struct TreeNode * exp;
+	struct Token * next = pt;
+
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(pt = next, remove_node_as_child(node), Match("INT_KEYWORD") && Identifier()){ 
+		match = true;
+	}
+
+	remove_node_from_deepest();	
+
+	if(match) return true;
+
+	set_error();
+	return false;
+}
+
+bool Function_Params(){
+	print_if_explicit("Function_Params\n");
+	bool match = false;
+	int i = 0;
+	struct Token * next = pt;
+	struct TreeNode *node = create_node("FUNCTION_PARAMS", "FUCTION_PARAMS");
+
+	if(cmpstr(pt->type, "CLOSE_PARENTHESIS")) {
+		return true;
+	}
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	while(Function_Param()){
+		next = pt;
+		match = true;
+
+		if(_Match("COMA_OP", false) == 0){
+			break;
+		}
+
+		if(i++ > 1000){
+			printf("Error: params amount exceeded 999!\n");
+			set_error();
+			return false;
+		}
+	}
+
+	remove_node_from_deepest();	
+
+	return true;
+
 }
 
 bool Block_Item(){

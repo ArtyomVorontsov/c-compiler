@@ -3,6 +3,8 @@
 struct TreeNode * create_node(char *type, char *value);
 bool Program();
 bool Function();
+bool Function_Param();
+bool Function_Params();
 bool Statement();
 bool Declaration();
 bool Function_Body();

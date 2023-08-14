@@ -52,6 +52,7 @@ char * machine_step2_LESS_THAN_OR_EQUAL_OP_FA(char *p);
 char * machine_GREATER_THAN_OP_FA(char *p);
 char * machine_GREATER_THAN_OR_EQUAL_OP_FA(char *p);
 char * machine_step2_GREATER_THAN_OR_EQUAL_OP_FA(char *p);
+char * machine_COMA_OP_FA(char *p);
 
 /* CONDITIONALS */
 char * machine_IF_KEYWORD_FA(char *p);

@@ -563,6 +563,23 @@ struct Token * lex(char *inp){
 			token_end = tmp;
 		}
 
+		/* COMA */
+		tmp = token_end;
+		token_start = token_end;
+		token_end = machine_COMA_OP_FA(token_start);
+		if(token_end != (void *) FA_FAILED) { 
+			tokens[i].type = "COMA_OP";
+			cpy_str(token_start, token_end, tokens[i].value.string, 100);
+			curr_line_char = token_start - new_line_ptr;
+			tokens[i].position.line = curr_line;
+			tokens[i].position.line_char += curr_line_char;
+			i++;
+			token_end++;
+			continue;
+		} else {
+			token_end = tmp;
+		}
+
 		/* IDENTIFIER */
 		tmp = token_end;
 		token_start = token_end;
@@ -693,6 +710,7 @@ char * machine_step2_IDENTIFIER_FA(char *p) {
 		case '(':
 		case ')':
 		case ';':
+		case ',':
 		case '\n':
 		case '\t':
 			return p - 1;
@@ -1215,6 +1233,15 @@ char * machine_COLON_OP_FA(char *p) {
 char * machine_QUESTION_MARK_OP_FA(char *p) {
 	switch (*p){
 		case '?': 
+			return p + 1;
+		default:
+			return (void *) FA_FAILED;
+	}	
+}
+
+char * machine_COMA_OP_FA(char *p) {
+	switch (*p){
+		case ',': 
 			return p + 1;
 		default:
 			return (void *) FA_FAILED;
