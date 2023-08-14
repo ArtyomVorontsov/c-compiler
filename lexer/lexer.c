@@ -802,6 +802,7 @@ char * machine_step2_INT_FA(char *p){
 		case '=':
 		case '&':
 		case '|':
+		case ',':
 		case '\n':
 		case '\t':
 			return p - 1;

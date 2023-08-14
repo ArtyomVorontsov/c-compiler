@@ -80,6 +80,86 @@ bool Function(){
 	return false;
 }
 
+bool Function_Argument(){
+	print_if_explicit("Function_Argument\n");
+	bool match = false;
+	struct TreeNode * node = create_node("FUNCTION_ARGUMENT", "FUNCTION_ARGUMENT");
+	struct TreeNode * exp;
+	struct Token * next = pt;
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	if(pt = next, remove_node_as_child(node), exp = Expression(), expression_error == 0){ 
+		match = true;
+ 		set_as_child(exp);
+	}
+
+	remove_node_from_deepest();	
+
+	if(match) return true;
+
+	set_error();
+	return false;
+}
+
+bool Function_Arguments(){
+	print_if_explicit("Function_Arguments\n");
+	bool match = false;
+	int i = 0;
+	struct Token * next = pt;
+	struct TreeNode *node = create_node("FUNCTION_ARGUMENTS", "FUCTION_ARGUMENTS");
+
+	if(cmpstr(pt->type, "CLOSE_PARENTHESIS")) {
+		return true;
+	}
+
+ 	set_as_child(node);
+	set_node_as_deepest(node);
+
+	while(Function_Argument()){
+		next = pt;
+		match = true;
+
+		if(_Match("COMA_OP", false) == 0){
+			break;
+		}
+
+		if(i++ > 1000){
+			printf("Error: argument amount exceeded 999!\n");
+			set_error();
+			return false;
+		}
+	}
+
+	remove_node_from_deepest();	
+
+	return true;
+}
+
+struct TreeNode * Function_Call(){
+	print_if_explicit("Function_Call\n");
+	struct TreeNode *node = create_node("FUNCTION_CALL", "FUCTION_CALL");
+	bool match;
+
+	set_node_as_deepest(node);
+
+	match = Identifier() && 
+		_Match("OPEN_PARENTHESIS", false) && 
+		Function_Arguments() &&
+		_Match("CLOSE_PARENTHESIS", false);
+
+	remove_node_from_deepest();
+
+	if(match == false){
+		set_error();
+		//expression_error = true;
+		return false;
+	}
+
+	return node;
+}
+
 bool Function_Param(){
 	print_if_explicit("Function_Param\n");
 	bool match = false;
@@ -776,6 +856,10 @@ struct TreeNode * Factor(){
 	else if ((pt = next, remove_as_child(), pt->type) && _Match("SEMICOLON", false)){
 		next = pt;
 	} 
+	else if ((pt = next, remove_as_child(), pt->type) && (exp_node = Function_Call())){
+		set_node_as_child(node, exp_node);
+		next = pt;
+	}
 	else if ((pt = next, remove_as_child(), pt->type) && (cmpstr(pt->type, "IDENTIFIER"))){
 		var_node = Var();
 		set_node_as_child(node, var_node);
@@ -788,7 +872,7 @@ struct TreeNode * Factor(){
 		set_error();
 	}
 
-	remove_node_from_deepest();	
+	remove_node_from_deepest();
 
 	return node;
 }
