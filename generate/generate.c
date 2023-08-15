@@ -22,9 +22,10 @@ struct LoopLabels * loop_labels[100];
 
 void generate_program(struct TreeNode * node){
 	print_if_explicit("generate_program\n");
+	struct TreeNode * child_node = node->children[0];
 	
-	if(strcmp(node->type, "FUNCTION") == 0){
-			generate_function(node);
+	if(strcmp(child_node->type, "FUNCTION_DEFINITION") == 0){
+			generate_function_definition(child_node);
 	}
 	else {
 		if(SILENT_ARG != true)
@@ -32,11 +33,10 @@ void generate_program(struct TreeNode * node){
 	}
 }
 
-void generate_function(struct TreeNode * node){
-	print_if_explicit("generate_function\n");
-	struct TreeNode * function_definition = node->children[0];
-	char *identifier_value = function_definition->children[1]->value;
-	struct TreeNode * statement_node = function_definition->children[2];
+void generate_function_definition(struct TreeNode * node){
+	print_if_explicit("generate_function_definition\n");
+	char *identifier_value = node->children[1]->value;
+	struct TreeNode * statement_node = node->children[2];
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);

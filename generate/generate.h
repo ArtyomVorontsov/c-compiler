@@ -1,6 +1,6 @@
 #include "../compiler.h"
 void generate_program(struct TreeNode * node);
-void generate_function(struct TreeNode * node);
+void generate_function_definition(struct TreeNode * node);
 void generate_function_body(struct TreeNode * node);
 void generate_compound(struct TreeNode * node);
 void generate_block_item(struct TreeNode * node);
