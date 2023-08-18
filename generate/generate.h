@@ -1,6 +1,8 @@
 #include "../compiler.h"
 void generate_program(struct TreeNode * node);
 void generate_function_definition(struct TreeNode * node);
+void generate_function_call(struct TreeNode * node);
+void generate_function(struct TreeNode * node);
 void generate_function_body(struct TreeNode * node);
 void generate_compound(struct TreeNode * node);
 void generate_block_item(struct TreeNode * node);
@@ -29,7 +31,7 @@ void generate_term(struct TreeNode * node);
 void generate_fact(struct TreeNode * node);
 void stack_push();
 void stack_pop();
-void generate_prologue();
+void generate_prologue(struct TreeNode * node);
 void generate_epilogue();
 void generate_operand(struct TreeNode * node);
 char * generate_unique_label(char * l);
@@ -49,6 +51,7 @@ char * get_current_loop_end_label();
 void unregister_loop();
 
 void register_var(char * name);
+void link_var(char * name, int offset);
 struct VarEntity * create_var_enity(char * name, int offset);
 void unregister_var_by_name(char * name);
 struct VarEntity * get_var_by_name(char * name);

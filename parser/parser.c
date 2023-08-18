@@ -234,11 +234,12 @@ bool Function_Params(){
 	struct Token * next = pt;
 	struct TreeNode *node = create_node("FUNCTION_PARAMS", "FUCTION_PARAMS");
 
+ 	set_as_child(node);
+
 	if(cmpstr(pt->type, "CLOSE_PARENTHESIS")) {
 		return true;
 	}
 
- 	set_as_child(node);
 	set_node_as_deepest(node);
 
 	while(Function_Param()){

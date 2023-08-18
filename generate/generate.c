@@ -10,7 +10,7 @@ struct VarEntity {
 struct VarEntity * var_map[100][100];
 int registered_var_amount[100] = { 0 };
 void generate(struct TreeNode * root_node){
-	generate_program(root_node->children[0]);
+	generate_program(root_node);
 }
 int scope_depth = 0;
 int loop_depth = 0;
@@ -22,35 +22,69 @@ struct LoopLabels * loop_labels[100];
 
 void generate_program(struct TreeNode * node){
 	print_if_explicit("generate_program\n");
-	struct TreeNode * child_node = node->children[0];
-	
-	if(strcmp(child_node->type, "FUNCTION_DEFINITION") == 0){
-			generate_function_definition(child_node);
+
+	for(int i = 0; i < node->children_amount; i++){
+		if(strcmp(node->children[i]->type, "FUNCTION") == 0){
+			generate_function(node->children[i]);
+		}
+		else {
+			if(SILENT_ARG != true)
+				printf("No handler\n");
+		}
 	}
-	else {
-		if(SILENT_ARG != true)
-			printf("No handler\n");
+}
+void generate_function(struct TreeNode * node){
+	print_if_explicit("generate_function\n");
+
+	struct TreeNode * child_node = node->children[0];
+
+	if(strcmp(child_node->type, "FUNCTION_DEFINITION") == 0){
+		generate_function_definition(child_node);
 	}
 }
 
 void generate_function_definition(struct TreeNode * node){
 	print_if_explicit("generate_function_definition\n");
 	char *identifier_value = node->children[1]->value;
-	struct TreeNode * statement_node = node->children[2];
+	struct TreeNode * parameters_node = node->children[2];
+	struct TreeNode * statement_node = node->children[3];
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_value);
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s:\n", identifier_value);
-	generate_prologue();
+	enter_scope();
+	generate_prologue(parameters_node);
+
 	generate_function_body(statement_node);
 	generate_epilogue();
+	exit_scope();
 }
 
-void generate_prologue(){
+void generate_prologue(struct TreeNode * node){
+	struct TreeNode * var_identifier_node;
+
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PROLOGUE\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%ebp\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%esp, %%ebp\n");
+
+	for(int i = 0; i < node->children_amount; i++){
+		// Empty variable declaration
+		 var_identifier_node = node->children[i]->children[1];
+/*
+		// Initialize variable to zero
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# INIT VAR\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
+
+		// Push variable on to the stack
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PUSH VAR ON TO THE STACK\n");	
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n"); */
+
+		// Register variable
+		link_var(var_identifier_node->value, i);
+	}
 }
 
 void generate_epilogue(){
@@ -482,6 +516,9 @@ void generate_expression(struct TreeNode * node){
 	else if(strcmp(child_node->type, "NON_ZERO_CONSTANT") == 0){
 		generate_non_zero_constant_expression(child_node);
 	}
+	else if(strcmp(child_node->type, "FUNCTION_ARGUMENT") == 0){
+		generate_expression(child_node);
+	}
 	else {
 		if(SILENT_ARG != true)
 			printf("No handler\n");
@@ -893,6 +930,26 @@ void generate_fact(struct TreeNode * node){
 	else if(strcmp(child_node->type, "UNARY_STATEMENT") == 0) {
 		generate_unary_op(child_node);
 	}
+	else if(strcmp(child_node->type, "FUNCTION_CALL") == 0) {
+		generate_function_call(child_node);
+	}
+}
+
+void generate_function_call(struct TreeNode * node){
+	print_if_explicit("generate_function_call");
+	struct TreeNode * arguments = node->children[1];
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# FUNCTION CALL\n");	
+
+	// Push arguments to the stack in reverse order
+	for(int i = arguments->children_amount - 1; i >= 0; i--){
+		generate_expression(arguments->children[i]);
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
+	}
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "call %s\n", node->children[0]->value);
+	// After function call
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl $%d, %%esp\n", arguments->children_amount * 4);
 }
 
 void stack_push(){
@@ -926,6 +983,13 @@ void register_var(char * name){
 	}
 
 	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, -(registered_var_amount[scope_depth] + 1) * 4);
+	registered_var_amount[scope_depth]++;
+}
+
+void link_var(char * name, int offset){
+	print_if_explicit("link_var\n");
+
+	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, (offset + 2) * 4);
 	registered_var_amount[scope_depth]++;
 }
 

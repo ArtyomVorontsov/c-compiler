@@ -42,6 +42,8 @@ do
 		let failed_count=failed_count+1
 	fi	
 	
+	echo "====================================="; 
+	echo "" 
 
 	rm ${DIR}/*.s
 done
