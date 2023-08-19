@@ -930,6 +930,17 @@ void generate_function_call(struct TreeNode * node){
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# FUNCTION CALL\n");	
+	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# ALIGN STACK FOR OS X\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%esp, %%eax\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "subl $%d, %%eax\n", 4 * node->children_amount + 1);	
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "xorl %%edx, %%edx\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0x20, %%ecx\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "idivl %%ecx\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "subl %%edx, %%esp\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "pushl %%edx\n");	
+
 	if(fn_arguments_available)
 		// Push arguments to the stack in reverse order
 		for(int i = arguments->children_amount - 1; i >= 0; i--){
@@ -941,6 +952,10 @@ void generate_function_call(struct TreeNode * node){
 	// After function call deallocate arguments if needed
 	if(fn_arguments_available)
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl $%d, %%esp\n", arguments->children_amount * 4);
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# REMOVE STACK ALIGNEMENT\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "popl %%edx\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl %%edx, %%esp\n");	
 }
 
 void stack_push(){
