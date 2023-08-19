@@ -973,7 +973,12 @@ void stack_pop(){
 
 char * generate_unique_label(char * l){
 	char * label  = malloc(100);
-	sprintf(label, "%s_%d", l, LABEL_AMOUNT++);	
+	#if __APPLE__
+		sprintf(label, "_%s_%d", l, LABEL_AMOUNT++);
+	#else
+		sprintf(label, "%s_%d", l, LABEL_AMOUNT++);
+	#endif
+
 	return label;
 }
 
