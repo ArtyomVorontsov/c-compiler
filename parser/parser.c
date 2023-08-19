@@ -33,13 +33,11 @@ bool Program(){
 	print_if_explicit("Program\n");
 	struct TreeNode *node = create_node("PROGRAM", "PROGRAM");
 	bool match = false;
-	struct Token * next = pt;
 	struct TreeNode * root_node = nodes_stack[0];
 
 	set_node_as_deepest(node);
 
 	while(pt->type != 0 && Function()){
-		next = pt;
 		match = true;
 	}
 
@@ -197,7 +195,6 @@ struct TreeNode * Function_Call(){
 
 	if(match == false){
 		set_error();
-		//expression_error = true;
 		return false;
 	}
 
@@ -306,7 +303,7 @@ bool Function_Body(){
  	set_as_child(node);
 	set_node_as_deepest(node);
 
-	while(Block_Item()){
+	while(pt->type != 0 && Block_Item()){
 		next = pt;
 		match = true;
 
@@ -362,7 +359,6 @@ bool Statement(){
 		expression_error = false, 1) &&
 		(exp = Conditional(), set_node_as_child(node, exp), expression_error == false)
 	){
-
 		match = true;
 	}
 	else if (

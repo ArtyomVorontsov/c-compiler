@@ -68,21 +68,9 @@ void generate_prologue(struct TreeNode * node){
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%ebp\n");
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%esp, %%ebp\n");
 
+	// Link argument values
 	for(int i = 0; i < node->children_amount; i++){
-		// Empty variable declaration
-		 var_identifier_node = node->children[i]->children[1];
-/*
-		// Initialize variable to zero
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# INIT VAR\n");	
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
-
-		// Push variable on to the stack
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# PUSH VAR ON TO THE STACK\n");	
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n"); */
-
-		// Register variable
+		var_identifier_node = node->children[i]->children[1];
 		link_var(var_identifier_node->value, i);
 	}
 }
@@ -111,11 +99,11 @@ void generate_function_body(struct TreeNode * node){
 					printf("No handler\n");
 			}
 		}
-	} else {
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# NO RETURN STATEMENT\n");
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
-	}
+	} 
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# NO RETURN STATEMENT\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %%eax\n");
 }
 
 void generate_compound(struct TreeNode * node){
@@ -936,20 +924,23 @@ void generate_fact(struct TreeNode * node){
 }
 
 void generate_function_call(struct TreeNode * node){
-	print_if_explicit("generate_function_call");
+	print_if_explicit("generate_function_call\n");
 	struct TreeNode * arguments = node->children[1];
+	bool fn_arguments_available = node->children_amount > 1;
 
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# FUNCTION CALL\n");	
-
-	// Push arguments to the stack in reverse order
-	for(int i = arguments->children_amount - 1; i >= 0; i--){
-		generate_expression(arguments->children[i]);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
-	}
+	if(fn_arguments_available)
+		// Push arguments to the stack in reverse order
+		for(int i = arguments->children_amount - 1; i >= 0; i--){
+			generate_expression(arguments->children[i]);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "push %%eax\n");
+		}
+	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "call %s\n", node->children[0]->value);
-	// After function call
-	asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl $%d, %%esp\n", arguments->children_amount * 4);
+	// After function call deallocate arguments if needed
+	if(fn_arguments_available)
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "addl $%d, %%esp\n", arguments->children_amount * 4);
 }
 
 void stack_push(){
