@@ -160,7 +160,7 @@ void generate_declaration(struct TreeNode * node){
 		// Check if variable already exists
 		struct VarEntity * var = get_var_by_name_in_current_scope(var_node->children[0]->value);
 
-		if(var == -1){
+		if(var == (struct VarEntity *) -1){
 			// generate expression which will be assigned to var
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# INIT VAR\n");	
@@ -186,7 +186,7 @@ void generate_declaration(struct TreeNode * node){
 		// Check if variable already exists
 		struct VarEntity * var = get_var_by_name_in_current_scope(identifier_node->value);
 
-		if(var == -1){
+		if(var == (struct VarEntity *) -1){
 			// Initialize variable to zero
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# INIT VAR\n");	
@@ -968,7 +968,7 @@ void register_var(char * name){
 	print_if_explicit("register_var\n");
 	struct VarEntity * var = get_var_by_name(name);
 
-	if(var > -1){
+	if(var > (struct VarEntity *) -1){
 		printf("ERROR: Variable %s is already declared\n", name);
 		exit(1);
 	}
@@ -1025,7 +1025,7 @@ struct VarEntity * get_var_by_name_with_error(char * name) {
 
 	struct VarEntity * var = get_var_by_name(name);
 
-	if(var == -1){
+	if(var == (struct VarEntity *) -1){
 		printf("ERROR: Variable %s is not declared\n", name);
 		exit(1);
 	}
@@ -1045,7 +1045,7 @@ struct VarEntity * get_var_by_name(char * name){
 		}
 	}
 
-	return -1;
+	return (struct VarEntity *) -1;
 }
 
 struct VarEntity * get_var_by_name_in_current_scope(char * name){
@@ -1057,7 +1057,7 @@ struct VarEntity * get_var_by_name_in_current_scope(char * name){
 		}
 	}
 
-	return -1;
+	return (struct VarEntity *) -1;
 }
 
 void unregister_var_by_name(char * name){
