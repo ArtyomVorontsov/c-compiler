@@ -42,6 +42,10 @@ int main(int argc, char **argv){
 		print_parse_tree(root_node, PRINT_PARSE_TREE_EXPLICIT_ARG);
 	}
 
+	analyze(root_node);
+	if(SILENT_ARG != true)
+		printf("\nAnalyze completed.\n\n");
+
 	generate(root_node);
 	if(SILENT_ARG != true)
 		printf("\nCode generation completed.\n\n");

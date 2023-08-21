@@ -33,6 +33,9 @@ struct TreeNode {
 
 struct TreeNode * parse();
 
+/* ANALYZER */
+void analyze(struct TreeNode * root_node);
+
 /* GENERATE */
 void generate(struct TreeNode * root_node);
 

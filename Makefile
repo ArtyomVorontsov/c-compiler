@@ -1,4 +1,4 @@
- files := compiler.c compiler.h ./lexer/lexer.c ./lexer/lexer.h ./parser/parser.c ./parser/parser.h ./generate/generate.c ./generate/generate.h
+ files := compiler.c compiler.h ./lexer/lexer.c ./lexer/lexer.h ./parser/parser.c ./parser/parser.h ./generate/generate.c ./generate/generate.h ./analyzer/analyzer.c ./analyzer/analyzer.h
 
 compiler := gcc
 
