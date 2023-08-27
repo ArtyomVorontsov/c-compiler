@@ -52,7 +52,7 @@ bool Program(){
 bool Function(){
 	print_if_explicit("Function\n");
 	struct TreeNode *node = create_node("FUNCTION", "FUCTION");
-	bool match;
+	bool match = false;
 	struct Token * next = pt;
 
  	set_as_child(node);
@@ -86,10 +86,9 @@ bool Function_Definition(){
 		_Match("OPEN_PARENTHESIS", false) && 
 		Function_Params() &&
 		_Match("CLOSE_PARENTHESIS", false) && 
-		_Match("OPEN_BRACE", false);
+		_Match("OPEN_BRACE", false) &&
 		Function_Body() && 
 		_Match("CLOSE_BRACE", false);
-
 
 	remove_node_from_deepest();
 
@@ -896,7 +895,7 @@ struct TreeNode * Factor(){
 	}
 	else if ((pt = next, remove_as_child(), pt->type) && _Match("SEMICOLON", false)){
 		next = pt;
-	} 
+	}
 	else if ((pt = next, remove_as_child(), pt->type) && (exp_node = Function_Call())){
 		set_node_as_child(node, exp_node);
 		next = pt;
