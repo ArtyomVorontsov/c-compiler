@@ -37,9 +37,7 @@ bool Program(){
 
 	set_node_as_deepest(node);
 
-	while(pt->type != 0 && Function()){
-		match = true;
-	}
+	while(pt->type != 0 && (match = Function()));
 
 	remove_node_from_deepest();	
 
