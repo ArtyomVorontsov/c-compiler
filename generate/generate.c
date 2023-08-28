@@ -9,6 +9,7 @@ struct VarEntity {
 };
 struct VarEntity * var_map[100][100];
 int registered_var_amount[100] = { 0 };
+int arguments_var_amount[100] = { 0 };
 void generate(struct TreeNode * root_node){
 	generate_program(root_node);
 }
@@ -993,7 +994,7 @@ void register_var(char * name){
 		exit(1);
 	}
 
-	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, -(registered_var_amount[scope_depth] + 1) * 4);
+	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, -(registered_var_amount[scope_depth] - arguments_var_amount[scope_depth] + 1) * 4);
 	registered_var_amount[scope_depth]++;
 }
 
@@ -1002,6 +1003,7 @@ void link_var(char * name, int offset){
 
 	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, (offset + 2) * 4);
 	registered_var_amount[scope_depth]++;
+	arguments_var_amount[scope_depth]++;
 }
 
 struct VarEntity * create_var_enity(char * name, int offset){
@@ -1023,6 +1025,7 @@ void enter_scope(){
 
 	scope_depth++;
 	registered_var_amount[scope_depth] = registered_var_amount[scope_depth - 1];
+	arguments_var_amount[scope_depth] = arguments_var_amount[scope_depth - 1];
 	create_var_map();
 }
 
@@ -1036,6 +1039,7 @@ void exit_scope(){
 
 	// Dealocate variables
 	registered_var_amount[scope_depth] = 0;
+	arguments_var_amount[scope_depth] = 0;
 	scope_depth--;
 }
 
