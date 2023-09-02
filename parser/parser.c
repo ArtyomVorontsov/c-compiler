@@ -34,10 +34,29 @@ bool Program(){
 	struct TreeNode *node = create_node("PROGRAM", "PROGRAM");
 	bool match = false;
 	struct TreeNode * root_node = nodes_stack[0];
+	struct Token * next = pt;
 
 	set_node_as_deepest(node);
 
-	while(pt->type != 0 && (match = Function()));
+	while(1){
+		if(pt->type != 0){
+			if(Function()){
+				match = true;
+				next = pt;
+			}
+			else if (pt = next, remove_node_as_child(node), (Declaration() && _Match("SEMICOLON", false))){
+				match = true;
+				next = pt;
+			}
+			else {
+				match = false;
+				break;
+			}
+
+		} else {
+			break;
+		}
+	}
 
 	remove_node_from_deepest();	
 
@@ -927,7 +946,6 @@ bool Declaration(){
 
 	set_as_child(node); 
 	set_node_as_deepest(node);
-
 
 	if(cmpstr(pt->type, "INT_KEYWORD")){
 		int_keyword = create_node(pt->type, pt->value.string);
