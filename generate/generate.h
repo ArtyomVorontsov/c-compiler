@@ -36,6 +36,7 @@ void generate_epilogue();
 void generate_operand(struct TreeNode * node);
 char * generate_unique_label(char * l);
 void generate_declaration(struct TreeNode * node);
+void generate_global_declaration(struct TreeNode * node);
 
 /* LOOPS */
 void generate_loop(struct TreeNode * node);
@@ -51,6 +52,7 @@ char * get_current_loop_end_label();
 void unregister_loop();
 
 void register_var(char * name);
+void register_global_var(char * name);
 void link_var(char * name, int offset);
 struct VarEntity * create_var_enity(char * name, int offset);
 void unregister_var_by_name(char * name);

@@ -10,6 +10,7 @@ struct VarEntity {
 struct VarEntity * var_map[100][100];
 int registered_var_amount[100] = { 0 };
 int arguments_var_amount[100] = { 0 };
+int global_var_amount[100] = { 0 };
 void generate(struct TreeNode * root_node){
 	generate_program(root_node);
 }
@@ -27,6 +28,9 @@ void generate_program(struct TreeNode * node){
 	for(int i = 0; i < node->children_amount; i++){
 		if(strcmp(node->children[i]->type, "FUNCTION") == 0){
 			generate_function(node->children[i]);
+		}
+		if(strcmp(node->children[i]->type, "DECLARATION") == 0){
+			generate_global_declaration(node->children[i]);
 		}
 		else {
 			if(SILENT_ARG != true)
@@ -141,6 +145,87 @@ void generate_block_item(struct TreeNode * node){
 	} 
 	else if(strcmp(child_node->type, "DECLARATION") == 0) {
 		generate_declaration(child_node);
+	}
+}
+
+void generate_global_declaration(struct TreeNode * node){
+	print_if_explicit("generate_global_declaration\n");
+	struct TreeNode * var_node;
+	struct TreeNode * exp_node;
+	struct TreeNode * second_child = node->children[1];
+	struct TreeNode * identifier_node;
+	char * var_label;
+
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# GLOBAL DECLARATION STATEMENT\n");	
+	if(strcmp(second_child->type, "ASSIGN") == 0){
+		// Declaration of variable with assignement
+		var_node = second_child->children[0];
+		identifier_node = var_node->children[0];
+
+		// TODO: fix that shit, that is because of stupid AST generation strategy which should be changed in future
+		exp_node = second_child->children[1]
+		->children[0]
+		->children[0]
+		->children[0]
+		->children[0]
+		->children[0]
+		->children[0]
+		->children[0]
+		->children[0]
+		->children[0];
+
+		// Check if variable already exists
+		struct VarEntity * var = get_var_by_name_in_current_scope(var_node->children[0]->value);
+		if(var == (struct VarEntity *) -1){
+			// Register global variable
+			register_global_var(identifier_node->value);
+
+			// generate expression which will be assigned to var
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# INIT GLOBAL VAR\n");	
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".data\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".align 2\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s: \n", identifier_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".long %s\n", exp_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".text\n");
+		} else {
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".data\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".align 2\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s: \n", identifier_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".long %s\n", exp_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".text\n");
+		}
+
+
+
+	} else {
+		// Empty variable declaration
+		var_node = second_child;
+		identifier_node = var_node->children[0];
+
+		// Check if variable already exists
+		struct VarEntity * var = get_var_by_name_in_current_scope(var_label);
+
+		if(var == (struct VarEntity *) -1){
+			// Register global variable
+			register_global_var(identifier_node->value);
+
+			// Initialize variable to zero
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "# DECLARE GLOBAL VAR\n");
+			
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".globl %s\n", identifier_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".bss\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".align 4\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "%s: \n", identifier_node->value);
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".zero 4\n");
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, ".text\n");
+		} else {
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl $0, %s\n", identifier_node->value);
+		}
+
 	}
 }
 
@@ -561,6 +646,7 @@ void generate_assignement_expression(struct TreeNode * node){
 	struct TreeNode * identifier_node;
 	struct TreeNode * child_node = node->children[0];
 	struct VarEntity * var;
+	bool is_global;
 
 	// Declaration of variable with assignement
 	var_node = child_node->children[0];
@@ -574,8 +660,13 @@ void generate_assignement_expression(struct TreeNode * node){
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 	asm_buffer_ptr += sprintf(asm_buffer_ptr, "# ASSIGN VAR\n");	
 	generate_expression(exp_node);
-	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
-	asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %d(%%ebp)\n", var->offset);
+	asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");
+
+	is_global = var->offset == 0;
+	if(is_global)
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %s\n", var->name);
+	else 
+		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %%eax, %d(%%ebp)\n", var->offset);
 
 	print_if_explicit("generate_assignement_expression_exit\n");
 }
@@ -898,6 +989,7 @@ void generate_fact(struct TreeNode * node){
 	print_if_explicit("generate_fact\n");
 	struct TreeNode * child_node = node->children[0];
 	struct VarEntity * var;
+	bool is_global;
 
 	if(strcmp(child_node->type, "INT") == 0) {
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
@@ -908,7 +1000,14 @@ void generate_fact(struct TreeNode * node){
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "\n");	
 		asm_buffer_ptr += sprintf(asm_buffer_ptr, "# REFERENCE VAR\n");
 		var = get_var_by_name_with_error(child_node->children[0]->value);
-		asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %d(%%ebp), %%eax\n", var->offset);
+		
+		//global vars have offset == 0
+		is_global = var->offset == 0;
+		
+		if(is_global)
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %s, %%eax\n", var->name);
+		else 
+			asm_buffer_ptr += sprintf(asm_buffer_ptr, "movl %d(%%ebp), %%eax\n", var->offset);
 	}
 	else if(strcmp(child_node->type, "UNARY_OP") == 0) {
 		generate_unary_op(child_node->children[0]);
@@ -984,6 +1083,19 @@ char * generate_unique_label(char * l){
 }
 
 // Var map operations
+void register_global_var(char * name){
+	print_if_explicit("register_global_var\n");
+	struct VarEntity * var = get_var_by_name(name);
+
+	if(var > (struct VarEntity *) -1){
+		printf("ERROR: Variable %s is already declared\n", name);
+		exit(1);
+	}
+
+	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, 0);
+	registered_var_amount[scope_depth]++;
+	global_var_amount[scope_depth]++;
+}
 
 void register_var(char * name){
 	print_if_explicit("register_var\n");
@@ -994,7 +1106,7 @@ void register_var(char * name){
 		exit(1);
 	}
 
-	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, -(registered_var_amount[scope_depth] - arguments_var_amount[scope_depth] + 1) * 4);
+	var_map[scope_depth][registered_var_amount[scope_depth]] = create_var_enity(name, -(registered_var_amount[scope_depth] - arguments_var_amount[scope_depth] - global_var_amount[scope_depth] + 1) * 4);
 	registered_var_amount[scope_depth]++;
 }
 
