@@ -16,6 +16,9 @@ void analyze(struct TreeNode * node){
 
 	tree_traverse_1(node);
 	tree_traverse_2(node);
+	for(int i = 0; i < node->children_amount; i++){
+		tree_traverse_3(node->children[i]);
+	}
 }
 
 void tree_traverse_1(struct TreeNode * node){
@@ -35,7 +38,6 @@ void tree_traverse_1(struct TreeNode * node){
 			printf("ERROR: Ambigous function declaration %s.\n", function_name);
 			exit(1);
 		}
-
 
 		if(fn_record != -1 && fn_record->declared == false){
 			fn_record->declared = true;
@@ -134,6 +136,36 @@ void tree_traverse_2(struct TreeNode * node){
 
 	for(i = 0; i < node->children_amount; i++){
 		tree_traverse_2(node->children[i]);
+	}
+}
+
+void tree_traverse_3(struct TreeNode * node){
+	int i;
+	struct FunctionRecord * fn_record;
+	char * variable_name;
+
+	if(strcmp("DECLARATION", node->type) == 0){
+		print_if_explicit("DECLARATION\n");
+
+		if(strcmp("ASSIGN", node->children[1]->type) == 0){
+			print_if_explicit("VARIABLE_DEFINITION\n");
+			variable_name = node->children[1]->children[0]->children[0]->value;
+			fn_record = find_function_record(variable_name);
+
+			if(fn_record != -1 && fn_record->defined){
+				printf("ERROR: Attempt to define variable %s with the same name as declared function\n", variable_name);
+				exit(1);
+			}
+		} else {
+			print_if_explicit("VARIABLE_DECLARATION\n");
+			variable_name = node->children[1]->value;
+			fn_record = find_function_record(variable_name);
+
+			if(fn_record != -1 && fn_record->declared){
+				printf("ERROR: Attempt to declare variable %s with the same name as defined function\n", variable_name);
+				exit(1);
+			}
+		}
 	}
 }
 
