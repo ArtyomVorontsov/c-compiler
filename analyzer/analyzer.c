@@ -11,6 +11,14 @@ struct FunctionRecord {
 struct FunctionRecord * records[100];
 int function_records_amount = 0;
 
+struct VariableRecord {
+	char * name;
+	bool declared;
+	bool defined;
+};
+struct VariableRecord * variable_records[100];
+int variable_records_amount = 0;
+
 void analyze(struct TreeNode * node){
 	print_if_explicit("Analysis started.\n\n");
 
@@ -34,12 +42,12 @@ void tree_traverse_1(struct TreeNode * node){
 		function_args_amount = node->children[2]->children_amount;
 		fn_record = find_function_record(function_name);
 
-		if(fn_record != -1 && fn_record->declared && (fn_record->declared_args_amount != function_args_amount)){
+		if(fn_record != (void *)-1 && fn_record->declared && (fn_record->declared_args_amount != function_args_amount)){
 			printf("ERROR: Ambigous function declaration %s.\n", function_name);
 			exit(1);
 		}
 
-		if(fn_record != -1 && fn_record->declared == false){
+		if(fn_record != (void *)-1 && fn_record->declared == false){
 			fn_record->declared = true;
 			fn_record->declared_args_amount = function_args_amount;
 		} 
@@ -54,17 +62,17 @@ void tree_traverse_1(struct TreeNode * node){
 		function_args_amount = node->children[2]->children_amount;
 		fn_record = find_function_record(function_name);
 
-		if(fn_record != -1 && fn_record->defined){
+		if(fn_record != (void *) -1 && fn_record->defined){
 			printf("ERROR: Function %s is already defined.\n", function_name);
 			exit(1);
 		}
 
-		if(fn_record != -1 && (fn_record->declared_args_amount != function_args_amount)){
+		if(fn_record != (void *)-1 && (fn_record->declared_args_amount != function_args_amount)){
 			printf("ERROR: Ambigous function definition %s.\n", function_name);
 			exit(1);
 		}
 
-		if(fn_record != -1 && fn_record->defined == false){
+		if(fn_record != (void *)-1 && fn_record->defined == false){
 			fn_record->defined = true;
 			fn_record->defined_args_amount = function_args_amount;
 		} else {
@@ -108,7 +116,7 @@ void tree_traverse_2(struct TreeNode * node){
 		function_args_amount = node->children_amount == 2 ? node->children[1]->children_amount : 0;
 		fn_record = find_function_record(function_name);
 
-		if(fn_record == -1 || (fn_record->declared == false && fn_record->defined == false)){
+		if(fn_record == (void *) -1 || (fn_record->declared == false && fn_record->defined == false)){
 			printf("ERROR: function %s is not declared or defined.\n", function_name);
 			exit(1);
 		}
@@ -142,6 +150,7 @@ void tree_traverse_2(struct TreeNode * node){
 void tree_traverse_3(struct TreeNode * node){
 	int i;
 	struct FunctionRecord * fn_record;
+	struct VariableRecord * var_record;
 	char * variable_name;
 
 	if(strcmp("DECLARATION", node->type) == 0){
@@ -152,19 +161,33 @@ void tree_traverse_3(struct TreeNode * node){
 			variable_name = node->children[1]->children[0]->children[0]->value;
 			fn_record = find_function_record(variable_name);
 
-			if(fn_record != -1 && fn_record->defined){
+			if(fn_record != (void *) -1 && fn_record->defined){
 				printf("ERROR: Attempt to define variable %s with the same name as declared function\n", variable_name);
 				exit(1);
 			}
+
+			var_record = find_variable_record(variable_name);
+			if(var_record != (void *) -1 && var_record->defined){
+				printf("ERROR: Variable %s is already defined.\n", variable_name);
+				exit(1);
+			}
+			register_variable_definition(variable_name);
 		} else {
 			print_if_explicit("VARIABLE_DECLARATION\n");
 			variable_name = node->children[1]->value;
 			fn_record = find_function_record(variable_name);
 
-			if(fn_record != -1 && fn_record->declared){
+			if(fn_record != (void *) -1 && fn_record->declared){
 				printf("ERROR: Attempt to declare variable %s with the same name as defined function\n", variable_name);
 				exit(1);
 			}
+
+			var_record = find_variable_record(variable_name);
+			if(var_record != (void *) -1 && var_record->declared){
+				printf("ERROR: Variable %s is already declared.\n", variable_name);
+				exit(1);
+			}
+			register_variable_declaration(variable_name);
 		}
 	}
 }
@@ -183,7 +206,7 @@ struct FunctionRecord * find_function_record(char * name){
 	return (struct FunctionRecord *) -1;
 }
 
-struct FunctionRecord * register_function_declaration(char * name, int args_amount){
+void register_function_declaration(char * name, int args_amount){
 	struct FunctionRecord *record;
 
 	record = (struct FunctionRecord *) malloc(sizeof(struct FunctionRecord));
@@ -194,7 +217,7 @@ struct FunctionRecord * register_function_declaration(char * name, int args_amou
 	records[function_records_amount++] = record;
 }
 
-struct FunctionRecord * register_function_definition(char * name, int args_amount){
+void register_function_definition(char * name, int args_amount){
 	struct FunctionRecord *record;
 
 	record = (struct FunctionRecord *) malloc(sizeof(struct FunctionRecord));
@@ -203,5 +226,37 @@ struct FunctionRecord * register_function_definition(char * name, int args_amoun
 	record->defined = true;
 
 	records[function_records_amount++] = record;
+}
+
+struct VariableRecord * find_variable_record(char * name){
+	int i;
+
+	for(i = 0; i < variable_records_amount; i++){
+		if(strcmp(name, variable_records[i]->name) == 0){
+			return variable_records[i];
+		}
+	}
+
+	return (struct VariableRecord *) -1;
+}
+
+void register_variable_declaration(char * name){
+	struct VariableRecord *record;
+
+	record = (struct VariableRecord *) malloc(sizeof(struct VariableRecord));
+	record->name = name;
+	record->declared = true;
+
+	variable_records[variable_records_amount++] = record;
+}
+
+void register_variable_definition(char * name){
+	struct VariableRecord *record;
+
+	record = (struct VariableRecord *) malloc(sizeof(struct VariableRecord));
+	record->name = name;
+	record->defined = true;
+
+	variable_records[variable_records_amount++] = record;
 }
 
